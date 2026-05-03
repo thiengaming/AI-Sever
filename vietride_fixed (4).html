@@ -1,0 +1,2858 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VietRide – Đặt xe Việt Nam</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#c62828;--red2:#b71c1c;--red3:#e53935;--red4:#ffcdd2;--red5:#fff5f5;
+  --gold:#f9a825;--gold2:#fffde7;
+  --dark:#1a0a0a;--mid:#5d1a1a;--muted:#8d5454;
+  --line:rgba(198,40,40,.12);--shadow:0 2px 12px rgba(198,40,40,.10);--shadow2:0 8px 32px rgba(198,40,40,.18);
+  --r1:6px;--r2:12px;--r3:18px;--r4:28px;
+  --green:#2e7d32;--green2:#e8f5e9;
+  --blue:#1565c0;--blue2:#e3f2fd;
+  --surface:#fff;--bg:#f2eded;
+  --text:#1a0a0a;--text2:#6b3232;--text3:#b08080;
+}
+html,body{height:100%;font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);overflow:hidden;color:var(--text)}
+.app{display:flex;flex-direction:column;height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--red);padding:0 16px;height:54px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-shadow:0 3px 16px rgba(150,0,0,.35);z-index:600}
+.logo{font-family:'Lexend',sans-serif;font-size:22px;font-weight:900;color:#fff;letter-spacing:-1px;flex-shrink:0;cursor:pointer}
+.logo span{color:var(--gold)}
+.topbar-search{flex:1;position:relative;max-width:360px}
+.ts-inp{width:100%;padding:8px 14px 8px 36px;border-radius:50px;border:none;outline:none;font-size:12px;font-family:'Be Vietnam Pro',sans-serif;background:rgba(255,255,255,.15);color:white;transition:.2s}
+.ts-inp:focus{background:rgba(255,255,255,.25)}
+.ts-inp::placeholder{color:rgba(255,255,255,.55)}
+.ts-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none}
+#search-drop{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:white;border-radius:12px;border:1.5px solid var(--red4);box-shadow:var(--shadow2);z-index:900;max-height:260px;overflow-y:auto}
+.topbar-right{display:flex;align-items:center;gap:6px;margin-left:auto}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.15);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.2s;position:relative;flex-shrink:0}
+.icon-btn:hover{background:rgba(255,255,255,.28)}
+.notif-dot{width:7px;height:7px;background:var(--gold);border-radius:50%;position:absolute;top:5px;right:5px;border:1.5px solid var(--red)}
+
+/* LAYOUT */
+.main{display:flex;flex:1;overflow:hidden}
+.panel{width:400px;flex-shrink:0;background:var(--surface);display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--line);z-index:200;box-shadow:2px 0 20px rgba(0,0,0,.06)}
+.tabs{display:flex;background:white;border-bottom:2px solid var(--red5);flex-shrink:0}
+.tab{flex:1;padding:13px 4px;text-align:center;font-size:11px;font-weight:700;cursor:pointer;color:#bbb;border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:.2s;letter-spacing:.3px;text-transform:uppercase}
+.tab.on{color:var(--red);border-bottom-color:var(--red)}
+
+/* SCROLL */
+.panel-scroll{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.panel-scroll::-webkit-scrollbar{width:3px}
+.panel-scroll::-webkit-scrollbar-thumb{background:var(--red4);border-radius:4px}
+
+/* ROUTE CARD */
+.route-card{background:white;border:1.5px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow);overflow:visible;position:relative;z-index:50}
+.route-row{display:flex;align-items:center;position:relative;min-height:52px}
+.route-row+.route-row{border-top:1px solid var(--red5)}
+.r-icon-wrap{width:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.r-dot-g{width:11px;height:11px;border-radius:50%;background:#43a047;box-shadow:0 0 0 3px rgba(67,160,71,.18)}
+.r-dot-r{width:10px;height:10px;border-radius:2px;background:var(--red);box-shadow:0 0 0 3px rgba(198,40,40,.15)}
+.r-vline{position:absolute;top:100%;left:21px;width:2px;height:52px;background:linear-gradient(#43a047,var(--red));opacity:.25;z-index:0}
+.r-input{flex:1;border:none;outline:none;font-size:13px;font-family:'Be Vietnam Pro',sans-serif;color:var(--dark);background:transparent;height:52px;padding:0 6px 0 0}
+.r-input::placeholder{color:#ccc}
+.r-clear{width:26px;height:26px;border:none;background:var(--red5);border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:11px;color:var(--red);margin-right:8px;flex-shrink:0;transition:.15s}
+.r-clear.show{display:flex}
+.swap-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:1.5px solid var(--red4);background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--red);transition:.2s;z-index:5}
+.swap-btn:hover{background:var(--red5);transform:translateY(-50%) rotate(180deg)}
+
+/* SUGGESTIONS */
+.sug-wrap{display:none;position:relative;z-index:100}
+.sug-list{background:white;border:1.5px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow2);overflow:hidden;max-height:220px;overflow-y:auto}
+.sug-item{display:flex;align-items:center;gap:10px;padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--red5);transition:.12s}
+.sug-item:last-child{border-bottom:none}
+.sug-item:hover{background:var(--red5)}
+.sug-ico{width:30px;height:30px;border-radius:50%;background:var(--red5);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.sug-nm{font-size:12px;font-weight:600;color:var(--dark)}
+.sug-addr{font-size:10px;color:#999;margin-top:1px}
+
+/* INFO BARS */
+.weather-bar{background:linear-gradient(120deg,#0277bd,#039be5);border-radius:var(--r2);padding:10px 14px;display:flex;align-items:center;gap:10px;color:white;font-size:11px}
+.wb-ico{font-size:24px}
+.wb-info{flex:1}
+.wb-title{font-weight:700;font-size:12px}
+.wb-sub{font-size:10px;opacity:.75;margin-top:1px}
+.wb-temp{font-size:22px;font-weight:900}
+.wb-wind{font-size:9px;opacity:.7;text-align:right;margin-top:2px}
+.traffic-bar{border-radius:var(--r2);padding:9px 13px;display:flex;align-items:center;gap:9px;border:1.5px solid;font-size:11px}
+.traffic-bar.light{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20}
+.traffic-bar.medium{background:#fff8e1;border-color:#ffe082;color:#e65100}
+.traffic-bar.heavy{background:#ffebee;border-color:#ffcdd2;color:#b71c1c}
+.tb-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.traffic-bar.light .tb-dot{background:#43a047}
+.traffic-bar.medium .tb-dot{background:#fb8c00;animation:blink 1.5s infinite}
+.traffic-bar.heavy .tb-dot{background:#e53935;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.tb-txt{font-weight:700;font-size:12px}
+.tb-sub{font-size:10px;opacity:.75;margin-top:1px}
+
+/* NX */
+.nx-badge{background:linear-gradient(135deg,#1a237e,#283593);color:white;border-radius:var(--r2);padding:9px 13px;font-size:11px}
+.nx-badge-title{font-weight:800;font-size:12px;margin-bottom:5px}
+.nx-path{display:flex;flex-wrap:wrap;gap:3px;align-items:center}
+.nx-node{background:rgba(255,255,255,.2);padding:2px 8px;border-radius:50px;font-size:10px;font-weight:700}
+.nx-arrow{color:rgba(255,255,255,.5);font-size:10px}
+
+/* FUZZY BOX */
+.fuzzy-box{background:linear-gradient(135deg,#f3e5f5,#ede7f6);border:1.5px solid #ce93d8;border-radius:var(--r2);padding:12px 14px}
+.fz-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.fz-title{font-size:11px;font-weight:800;color:#4a148c;flex:1}
+.fz-toggle{font-size:9px;font-weight:700;color:#7b1fa2;cursor:pointer;background:rgba(123,31,162,.12);padding:2px 9px;border-radius:50px;border:1px solid rgba(123,31,162,.2);white-space:nowrap}
+.fz-factors{display:flex;flex-direction:column;gap:3px}
+.fz-row{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#6a1b9a;padding:2px 0}
+.fz-factor{background:rgba(106,27,154,.12);border-radius:50px;padding:1px 8px;font-weight:700;font-size:10px}
+.fz-multipliers{display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(74,20,140,.2)}
+.fz-mult-box{flex:1;background:rgba(74,20,140,.07);border-radius:var(--r1);padding:6px;text-align:center}
+.fz-mult-lbl{font-size:9px;color:#7b1fa2;font-weight:600;margin-bottom:2px}
+.fz-mult-val{font-size:16px;font-weight:900;color:#4a148c}
+.fz-detail{display:none;margin-top:8px}
+.fz-chart-title{font-size:9px;font-weight:800;color:#7b1fa2;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.fz-bars{display:flex;flex-direction:column;gap:4px}
+.fz-bar-row{display:flex;align-items:center;gap:7px}
+.fz-bar-lbl{font-size:9px;color:#6a1b9a;font-weight:600;width:110px;flex-shrink:0;text-align:right}
+.fz-bar-track{flex:1;height:9px;background:rgba(106,27,154,.1);border-radius:5px;overflow:hidden}
+.fz-bar-fill{height:100%;border-radius:5px;transition:width .5s ease}
+.fz-bar-val{font-size:9px;font-weight:700;color:#4a148c;width:28px;flex-shrink:0}
+.fz-mem-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px}
+.fz-mem-card{background:rgba(255,255,255,.6);border:1px solid rgba(106,27,154,.15);border-radius:var(--r1);padding:5px 8px}
+.fz-mem-name{font-size:8px;font-weight:800;color:#7b1fa2;text-transform:uppercase;letter-spacing:.3px}
+.fz-mem-bar{height:5px;background:rgba(106,27,154,.1);border-radius:3px;margin-top:3px;overflow:hidden}
+.fz-mem-fill{height:100%;border-radius:3px;transition:width .8s}
+.fz-mem-val{font-size:9px;font-weight:700;color:#4a148c;margin-top:2px}
+
+/* XE */
+.sec-ttl{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.xe-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:3px;margin-top:7px}
+.xe-scroll::-webkit-scrollbar{height:0}
+.xe-card{flex-shrink:0;width:110px;border:2px solid var(--line);border-radius:14px;padding:14px 8px 12px;background:white;cursor:pointer;text-align:center;transition:.18s;position:relative;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.xe-card:hover{border-color:var(--red4);background:var(--red5);transform:translateY(-2px);box-shadow:0 4px 14px rgba(198,40,40,.12)}
+.xe-card.on{border-color:var(--red);border-width:2.5px;background:linear-gradient(165deg,#fff0f0,var(--red5));box-shadow:0 5px 18px rgba(198,40,40,.22)}
+.xe-card.cheapest{border-color:#43a047}
+.xe-card.cheapest.on{border-color:#43a047;border-width:2.5px;background:linear-gradient(165deg,#f1f8e9,#e8f5e9);box-shadow:0 5px 18px rgba(67,160,71,.22)}
+.xe-ico{font-size:28px;line-height:1;margin-bottom:2px}
+.xe-nm{font-size:11px;font-weight:700;color:var(--dark)}
+.xe-pr{font-size:12px;font-weight:800;color:var(--red);margin-top:1px}
+.xe-card.cheapest .xe-pr{color:#2e7d32}
+.xe-mo{font-size:9px;color:#999;margin-top:1px;line-height:1.3}
+.xe-badge{position:absolute;top:-7px;left:50%;transform:translateX(-50%);background:var(--gold);color:#5d2000;font-size:8px;font-weight:800;padding:2px 7px;border-radius:50px;letter-spacing:.3px;border:2px solid white;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.xe-badge.eco{background:#43a047;color:white}
+
+/* CAT PICK */
+#cat-btn-passenger:hover,#cat-btn-cargo:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(198,40,40,.12)}
+#cat-btn-passenger.on{border-color:var(--red);background:linear-gradient(160deg,#fff0f0,var(--red5));box-shadow:0 5px 18px rgba(198,40,40,.2)}
+#cat-btn-cargo.on{border-color:#5d4037;background:linear-gradient(160deg,#fdf3ee,#fff8f5);box-shadow:0 5px 18px rgba(93,64,55,.15)}
+
+
+.promo-section{background:linear-gradient(135deg,#fff8e1,#fff3e0);border:1.5px solid #ffe082;border-radius:var(--r2);padding:12px 14px}
+.promo-header{display:flex;align-items:center;gap:9px;cursor:pointer}
+.promo-lbl{font-size:12px;font-weight:700;color:#e65100}
+.promo-sub{font-size:10px;color:#f57c00;margin-top:1px}
+.promo-input-row{display:flex;gap:7px;margin-top:10px;padding-top:9px;border-top:1px solid rgba(255,193,7,.3)}
+.promo-inp{flex:1;border:1.5px solid #ffcc02;border-radius:var(--r1);padding:7px 12px;font-size:13px;font-family:'Be Vietnam Pro',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;outline:none;color:var(--dark);background:white}
+.promo-inp:focus{border-color:#fb8c00}
+.promo-apply-btn{padding:7px 14px;background:linear-gradient(135deg,#ff6f00,#e65100);color:white;border:none;border-radius:var(--r1);font-size:12px;font-weight:800;font-family:'Be Vietnam Pro',sans-serif;cursor:pointer;white-space:nowrap}
+.promo-apply-btn:hover{opacity:.88}
+.promo-result{margin-top:8px;padding:7px 11px;border-radius:var(--r1);font-size:11px;font-weight:700;display:none;align-items:center;gap:7px}
+.promo-result.success{background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7;display:flex}
+.promo-result.error{background:#ffebee;color:#b71c1c;border:1px solid #ffcdd2;display:flex}
+.promo-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.promo-tag{background:rgba(251,143,0,.15);border:1px dashed #fb8c00;border-radius:50px;padding:2px 9px;font-size:9px;font-weight:800;color:#e65100;cursor:pointer;letter-spacing:.5px}
+.promo-tag:hover{background:rgba(251,143,0,.28)}
+
+/* PAYMENT */
+.pay-section{background:white;border:1.5px solid var(--line);border-radius:var(--r2);padding:12px 14px}
+.pay-ttl{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px}
+.pay-opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pay-opt{border:1.5px solid var(--line);border-radius:var(--r1);padding:8px 10px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:.18s;background:white}
+.pay-opt.on{border-color:var(--red);background:var(--red5)}
+.po-ico{font-size:18px}
+.po-nm{font-size:11px;font-weight:700;color:var(--dark)}
+.po-sub{font-size:9px;color:#aaa;margin-top:1px}
+
+/* LOADING */
+.loading{display:none;padding:24px;text-align:center}
+.loading.show{display:block}
+.spinner{width:32px;height:32px;margin:0 auto 10px;border:3px solid var(--red4);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-size:11px;color:var(--muted);font-weight:600}
+.loading-step{font-size:10px;color:#bbb;margin-top:4px}
+
+/* RESULTS */
+.kq{display:none;flex-direction:column;gap:9px}
+.kq.show{display:flex}
+.price-hero{background:linear-gradient(135deg,var(--red) 0%,var(--red2) 100%);border-radius:var(--r2);padding:14px 15px;color:white}
+.price-hero.bike-mode{background:linear-gradient(135deg,#2e7d32,#1b5e20)}
+.ph-top{display:flex;justify-content:space-between;align-items:flex-start}
+.ph-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;opacity:.75}
+.ph-num{font-size:28px;font-weight:900;letter-spacing:-1px;line-height:1.1;font-family:'Lexend',sans-serif}
+.ph-note{font-size:10px;opacity:.6;margin-top:3px}
+.ph-right{text-align:right}
+.ph-km{font-size:15px;font-weight:800}
+.ph-xe{font-size:10px;opacity:.7;margin-top:3px}
+.ph-divider{border:none;border-top:1px solid rgba(255,255,255,.2);margin:10px 0}
+.ph-breakdown{display:flex;flex-direction:column;gap:3px}
+.pb-row{display:flex;justify-content:space-between;font-size:10px;opacity:.85}
+.pb-row.total{opacity:1;font-weight:800;font-size:12px;border-top:1px solid rgba(255,255,255,.2);padding-top:5px;margin-top:2px}
+.pb-row.fuzzy-adj{font-style:italic}
+.pb-row.discount{color:#a5d6a7;font-weight:700}
+.route-sum{background:white;border:1.5px solid var(--line);border-radius:var(--r2);padding:12px 14px}
+.rs-item{display:flex;align-items:flex-start;gap:9px;padding:5px 0}
+.rs-item+.rs-item{border-top:1px dashed var(--red5);margin-top:3px;padding-top:8px}
+.rs-d{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.rs-d-g{background:#43a047;box-shadow:0 0 0 2px rgba(67,160,71,.2)}
+.rs-d-r{background:var(--red);box-shadow:0 0 0 2px rgba(198,40,40,.15)}
+.rs-role{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.rs-nm{font-size:12px;font-weight:600;color:var(--dark);margin-top:1px;line-height:1.3}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.stat-box{background:var(--red5);border-radius:var(--r1);padding:9px;text-align:center;border:1px solid var(--red4)}
+.s-ico{font-size:14px}
+.s-val{font-size:12px;font-weight:800;color:var(--red);margin-top:2px}
+.s-lbl{font-size:9px;color:var(--muted);margin-top:1px;font-weight:600}
+
+/* TRACK BAR */
+.track-bar{background:white;border:1.5px solid var(--line);border-radius:var(--r2);padding:12px 14px}
+.track-ttl{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.ts{display:flex;align-items:center;gap:9px;padding:6px 0;transition:.4s}
+.ts+.ts{border-top:1px dashed var(--red5)}
+.ts-dot{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:.4s}
+.ts-dot.done{background:var(--red);color:white;box-shadow:0 2px 8px rgba(198,40,40,.3)}
+.ts-dot.active{background:var(--gold);color:#5d2000;animation:glow 1.5s infinite}
+.ts-dot.wait{background:var(--red5);color:#ccc}
+.ts-dot.done-green{background:#43a047;color:white}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(249,168,37,.5)}50%{box-shadow:0 0 0 7px rgba(249,168,37,0)}}
+.ts-label{font-size:12px;font-weight:600;color:var(--dark);flex:1}
+.ts-label.active-label{color:var(--red);font-weight:800}
+.ts-label.done-label{color:#43a047;font-weight:700}
+.ts-sub{font-size:10px;color:#aaa;margin-top:1px}
+.ts-countdown{font-size:11px;font-weight:800;color:var(--gold);background:var(--gold2);padding:2px 10px;border-radius:50px}
+
+/* DRIVER */
+.driver-card{background:white;border:1.5px solid var(--line);border-radius:var(--r2);padding:13px 14px}
+.dc-top{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.dc-av{width:50px;height:50px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--red),var(--red2));display:flex;align-items:center;justify-content:center;font-size:24px;border:2.5px solid white;box-shadow:0 3px 12px rgba(198,40,40,.25)}
+.dc-av.bike-av{background:linear-gradient(135deg,#2e7d32,#1b5e20)}
+.dc-name{font-size:14px;font-weight:800;color:var(--dark)}
+.dc-coming{font-size:11px;color:var(--muted);margin-top:2px}
+.dc-star{display:flex;align-items:center;gap:6px;margin-top:4px}
+.dc-sv{font-size:11px;font-weight:700;color:#e65100;background:var(--gold2);padding:2px 7px;border-radius:50px}
+.dc-trip{font-size:10px;color:#bbb}
+.dc-plate{background:var(--red5);border-radius:var(--r1);padding:8px 12px;display:flex;align-items:center;gap:9px;border:1px solid var(--red4)}
+.dc-xe{font-size:12px;font-weight:700;color:var(--dark)}
+.dc-bien{font-size:11px;color:var(--muted);font-weight:600}
+.dc-actions{display:flex;gap:6px;margin-top:10px}
+.dc-btn{flex:1;padding:8px 5px;border:1.5px solid var(--red4);border-radius:var(--r1);background:white;cursor:pointer;font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;color:var(--red);display:flex;align-items:center;justify-content:center;gap:4px;transition:.15s}
+.dc-btn:hover{background:var(--red5)}
+.dc-btn.red{background:var(--red);color:white;border-color:var(--red)}
+.dc-btn.red:hover{background:var(--red2)}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:10px;font-weight:800;margin-top:5px}
+.sb-coming{background:#fff8e1;color:#e65100;border:1px solid #ffe082}
+.sb-moving{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
+.sb-arrived{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.ok-bar{border-radius:var(--r1);padding:11px 13px;text-align:center;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px}
+.ok-bar.coming{background:linear-gradient(135deg,#fff8e1,#fff3cd);border:1px solid #ffe082;color:#e65100}
+.ok-bar.moving{background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:1px solid #90caf9;color:#1565c0}
+.ok-bar.arrived{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:1px solid #a5d6a7;color:#1b5e20}
+@keyframes pulse2{0%,100%{opacity:1}50%{opacity:.5}}
+.pulsing{animation:pulse2 2s infinite}
+
+/* BUTTON */
+.btn-wrap{flex-shrink:0;padding:12px 14px;border-top:1px solid var(--red5);background:white}
+.btn-dat{width:100%;padding:14px;border:none;border-radius:var(--r4);background:linear-gradient(135deg,var(--red3),var(--red));color:white;font-size:14px;font-weight:800;font-family:'Lexend',sans-serif;cursor:pointer;box-shadow:0 5px 20px rgba(198,40,40,.35);transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.2px}
+.btn-dat:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(198,40,40,.45)}
+.btn-dat:active:not(:disabled){transform:scale(.98)}
+.btn-dat:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-dat.bike-btn{background:linear-gradient(135deg,#66bb6a,#2e7d32);box-shadow:0 5px 20px rgba(46,125,50,.35)}
+
+/* MAP */
+.map-wrap{flex:1;position:relative;overflow:hidden}
+#osm-map{width:100%;height:100%;border:none;display:block}
+.map-topbar{position:absolute;top:12px;right:12px;z-index:400;display:flex;flex-direction:column;gap:8px}
+.map-weather-card{background:white;border:2px solid #0288d1;border-radius:var(--r2);padding:10px 13px;box-shadow:0 4px 20px rgba(2,136,209,.18);min-width:160px}
+.mw-row{display:flex;align-items:center;gap:7px}
+.mw-ico{font-size:22px}
+.mw-temp{font-size:18px;font-weight:900;color:#0277bd;font-family:'Lexend',sans-serif}
+.mw-cond{font-size:10px;color:#546e7a;font-weight:600}
+.mw-details{display:flex;gap:9px;margin-top:6px;padding-top:6px;border-top:1px solid #e3f2fd}
+.mw-d{font-size:9px;color:#546e7a;text-align:center;flex:1}
+.mw-d b{display:block;font-size:11px;color:#0277bd;font-weight:800}
+.map-eta-card{background:white;border:2px solid var(--red);border-radius:var(--r2);padding:10px 14px;box-shadow:var(--shadow2);display:none;min-width:150px}
+.map-eta-card.show{display:block}
+.mo-lbl{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.mo-val{font-size:20px;font-weight:900;color:var(--red);font-family:'Lexend',sans-serif;line-height:1.1;margin-top:2px}
+.mo-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.map-bottom{position:absolute;bottom:16px;left:12px;right:12px;z-index:400;pointer-events:none}
+.map-route-info{background:white;border-radius:var(--r2);padding:10px 14px;box-shadow:0 4px 20px rgba(0,0,0,.15);border:1.5px solid var(--line);display:none;pointer-events:auto}
+.map-route-info.show{display:flex;align-items:center;gap:12px}
+.mri-badge{font-size:12px;font-weight:800;color:var(--red)}
+.mri-sep{width:1px;height:24px;background:var(--red4)}
+.mri-item{text-align:center}
+.mri-val{font-size:13px;font-weight:800;color:var(--dark)}
+.mri-lbl{font-size:9px;color:#aaa;margin-top:1px;font-weight:600}
+.map-traffic-legend{position:absolute;top:12px;left:12px;z-index:400;background:white;border-radius:var(--r2);padding:8px 12px;box-shadow:0 4px 16px rgba(0,0,0,.12);border:1px solid var(--line)}
+.tl-title{font-size:9px;font-weight:800;color:#546e7a;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.tl-item{display:flex;align-items:center;gap:6px;font-size:9px;color:#546e7a;font-weight:600;margin-bottom:3px}
+.tl-dot{width:8px;height:8px;border-radius:50%}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:none;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:white;border-radius:var(--r3);padding:22px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal h3{font-size:15px;font-weight:800;color:var(--dark);margin-bottom:14px}
+.mpo{border:1.5px solid var(--line);border-radius:var(--r2);padding:11px 14px;cursor:pointer;display:flex;align-items:center;gap:11px;margin-bottom:7px;transition:.18s}
+.mpo:hover,.mpo.on{border-color:var(--red);background:var(--red5)}
+.mpo-ico{font-size:22px}
+.mpo-nm{font-size:13px;font-weight:700;color:var(--dark)}
+.mpo-sub{font-size:11px;color:#888;margin-top:2px}
+.mpo-check{margin-left:auto;color:var(--red);font-size:16px;display:none}
+.mpo.on .mpo-check{display:block}
+.modal-btn{width:100%;margin-top:12px;padding:12px;border:none;border-radius:var(--r4);background:linear-gradient(135deg,var(--red3),var(--red));color:white;font-size:14px;font-weight:800;font-family:'Be Vietnam Pro',sans-serif;cursor:pointer}
+.promo-codes-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pcc{border:1.5px dashed var(--gold);border-radius:var(--r1);padding:9px 11px;cursor:pointer;background:var(--gold2);transition:.2s}
+.pcc:hover{background:#ffe082;border-style:solid}
+.pcc-code{font-size:13px;font-weight:900;color:#e65100;letter-spacing:1.5px}
+.pcc-desc{font-size:9px;color:#f57c00;margin-top:2px;font-weight:600}
+.pcc-badge{display:inline-block;background:#ff6f00;color:white;font-size:8px;font-weight:800;padding:1px 5px;border-radius:50px;margin-top:3px}
+
+/* HISTORY */
+.hist-empty{text-align:center;padding:60px 20px}
+.hist-ico{font-size:50px;margin-bottom:12px;opacity:.3}
+.hist-txt{font-size:13px;color:#bbb;font-weight:600}
+
+/* ── DRIVER LIVE CARD ──────────────────────────────── */
+.live-card{background:white;border:1.5px solid var(--line);border-radius:var(--r2);overflow:hidden}
+.lc-header{padding:12px 14px 0;display:flex;align-items:center;gap:11px}
+.lc-av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;border:3px solid white;flex-shrink:0;box-shadow:0 3px 14px rgba(0,0,0,.18)}
+.lc-av.red-av{background:linear-gradient(135deg,var(--red),var(--red2))}
+.lc-av.green-av{background:linear-gradient(135deg,#2e7d32,#1b5e20)}
+.lc-meta{flex:1;min-width:0}
+.lc-name{font-size:15px;font-weight:800;color:var(--dark)}
+.lc-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.lc-star{display:flex;align-items:center;gap:6px;margin-top:4px}
+.lc-sv{font-size:11px;font-weight:700;color:#e65100;background:#fff8e1;padding:2px 8px;border-radius:50px}
+.lc-trip{font-size:10px;color:#bbb}
+.lc-plate{margin:10px 14px;background:var(--red5);border-radius:var(--r1);padding:8px 12px;display:flex;align-items:center;gap:9px;border:1px solid var(--red4)}
+.lc-xe{font-size:12px;font-weight:700;color:var(--dark)}
+.lc-bien{font-size:11px;color:var(--muted);font-weight:600;margin-top:1px}
+.lc-actions{display:flex;gap:6px;padding:0 14px 12px}
+.lc-btn{flex:1;padding:8px 5px;border:1.5px solid var(--red4);border-radius:var(--r1);background:white;cursor:pointer;font-family:'Be Vietnam Pro',sans-serif;font-size:11px;font-weight:700;color:var(--red);display:flex;align-items:center;justify-content:center;gap:4px;transition:.15s}
+.lc-btn:hover{background:var(--red5)}
+.lc-btn.solid{background:var(--red);color:white;border-color:var(--red)}
+.lc-btn.solid:hover{background:var(--red2)}
+
+/* ── STATUS PILL ──────────────────────────────────── */
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:50px;font-size:11px;font-weight:800;margin-top:5px;transition:all .4s}
+.sp-finding{background:linear-gradient(135deg,#fff8e1,#ffe082);color:#e65100;border:1px solid #ffe082}
+.sp-coming{background:linear-gradient(135deg,#e3f2fd,#bbdefb);color:#1565c0;border:1px solid #90caf9}
+.sp-moving{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);color:#2e7d32;border:1px solid #a5d6a7}
+.sp-arrived{background:linear-gradient(135deg,#c62828,#b71c1c);color:white;border:1px solid var(--red)}
+
+/* ── PROGRESS BAR ─────────────────────────────────── */
+.trip-progress{padding:12px 14px;border-top:1px solid var(--red5)}
+.tp-label{display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.tp-track{height:6px;background:var(--red5);border-radius:3px;overflow:hidden}
+.tp-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--red3),var(--red));transition:width .8s ease;min-width:4px}
+.tp-stops{display:flex;justify-content:space-between;margin-top:5px}
+.tp-stop{font-size:9px;color:#bbb;font-weight:600;text-align:center;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tp-stop.done{color:#43a047}
+.tp-stop.active{color:var(--red);font-weight:800}
+
+/* ── ETA CHIP ─────────────────────────────────────── */
+.eta-chip{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--red5);border-top:1px solid var(--red4)}
+.eta-chip.moving{background:#e8f5e9;border-top-color:#c8e6c9}
+.etc-ico{font-size:20px}
+.etc-main{font-size:13px;font-weight:800;color:var(--dark)}
+.etc-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.etc-countdown{margin-left:auto;font-size:18px;font-weight:900;color:var(--red);font-family:'Lexend',sans-serif}
+.eta-chip.moving .etc-countdown{color:#2e7d32}
+
+/* ── ARRIVED CELEBRATION ──────────────────────────── */
+.arrived-card{border-radius:var(--r2);overflow:hidden;border:2px solid #43a047}
+.arr-hero{background:linear-gradient(135deg,#2e7d32,#1b5e20);padding:20px 16px;text-align:center;color:white}
+.arr-big-ico{font-size:52px;line-height:1;margin-bottom:8px;animation:bounce .6s ease infinite alternate}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+.arr-title{font-family:'Lexend',sans-serif;font-size:18px;font-weight:900;letter-spacing:-.5px}
+.arr-sub{font-size:11px;opacity:.75;margin-top:3px}
+.arr-stats{display:grid;grid-template-columns:repeat(3,1fr);background:white;border-top:none}
+.arr-stat{padding:12px 8px;text-align:center;border-right:1px solid var(--line)}
+.arr-stat:last-child{border-right:none}
+.arr-stat-val{font-size:14px;font-weight:800;color:var(--dark);font-family:'Lexend',sans-serif}
+.arr-stat-lbl{font-size:9px;color:#aaa;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.arr-rating{background:white;padding:14px 16px;border-top:1px solid var(--line)}
+.arr-rate-ttl{font-size:12px;font-weight:800;color:var(--dark);margin-bottom:8px}
+.arr-stars{display:flex;gap:6px;justify-content:center;margin-bottom:10px}
+.arr-star{font-size:30px;cursor:pointer;transition:.15s;filter:grayscale(1);opacity:.4}
+.arr-star.lit{filter:none;opacity:1;animation:starPop .2s ease}
+@keyframes starPop{0%{transform:scale(.8)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+.arr-comment{width:100%;border:1.5px solid var(--line);border-radius:var(--r1);padding:8px 12px;font-size:12px;font-family:'Be Vietnam Pro',sans-serif;resize:none;outline:none;color:var(--dark)}
+.arr-comment:focus{border-color:var(--red)}
+.arr-submit{width:100%;margin-top:8px;padding:11px;border:none;border-radius:var(--r4);background:linear-gradient(135deg,#43a047,#2e7d32);color:white;font-size:13px;font-weight:800;font-family:'Lexend',sans-serif;cursor:pointer;transition:.2s}
+.arr-submit:hover{opacity:.9;transform:translateY(-1px)}
+
+
+/* ── CARGO BUTTON ── */
+.btn-dat.cargo-btn{background:linear-gradient(135deg,#795548,#5d4037);box-shadow:0 5px 20px rgba(93,64,40,.35)}
+/* ── NOTIF / PROFILE MODALS ── */
+.big-modal{background:white;border-radius:18px;width:360px;max-height:82vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.28)}
+.bm-head{background:linear-gradient(135deg,#c62828,#b71c1c);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.bm-head-ico{font-size:22px}.bm-head-title{font-family:'Lexend',sans-serif;font-size:15px;font-weight:800;color:white;flex:1}
+.bm-close{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.2);cursor:pointer;color:white;font-size:13px;display:flex;align-items:center;justify-content:center}
+.bm-close:hover{background:rgba(255,255,255,.35)}
+.bm-body{overflow-y:auto;flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.bm-body::-webkit-scrollbar{width:3px}.bm-body::-webkit-scrollbar-thumb{background:#ffcdd2;border-radius:4px}
+.bm-footer{padding:10px 14px;border-top:1px solid #fff5f5;text-align:center;flex-shrink:0}
+.bm-footer-btn{background:none;border:none;color:#c62828;font-size:12px;font-weight:700;cursor:pointer;font-family:'Be Vietnam Pro',sans-serif}
+.ni{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:12px;border:1.5px solid rgba(198,40,40,.12);cursor:pointer;transition:.15s;position:relative}
+.ni:hover{background:#fff5f5;border-color:#ffcdd2}
+.ni.unread{background:linear-gradient(135deg,#fff5f5,#fff8f8);border-color:#ffcdd2}
+.ni.unread::before{content:"";position:absolute;top:10px;right:10px;width:7px;height:7px;background:#c62828;border-radius:50%}
+.ni-ico{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ni-ico.p{background:#fff3e0}.ni-ico.t{background:#e8f5e9}.ni-ico.s{background:#e3f2fd}.ni-ico.w{background:#ffebee}
+.ni-title{font-size:12px;font-weight:700;color:#1a0a0a}
+.ni-body{font-size:11px;color:#888;margin-top:2px;line-height:1.4}
+.ni-time{font-size:9px;color:#ccc;margin-top:4px;font-weight:600}
+/* PROFILE */
+.profile-modal{background:white;border-radius:18px;width:360px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.28)}
+.pm-hero{background:linear-gradient(135deg,#c62828,#b71c1c);padding:20px 18px 24px;text-align:center;position:relative}
+.pm-av{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#ff6f00,#f9a825);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:34px;border:3px solid rgba(255,255,255,.35);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.pm-name{font-family:'Lexend',sans-serif;font-size:17px;font-weight:900;color:white;letter-spacing:-.5px}
+.pm-phone{font-size:11px;color:rgba(255,255,255,.7);margin-top:3px}
+.pm-level{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);padding:3px 12px;border-radius:50px;font-size:10px;font-weight:800;color:white;margin-top:8px}
+.pm-close2{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.2);cursor:pointer;color:white;font-size:13px;display:flex;align-items:center;justify-content:center}
+.pm-close2:hover{background:rgba(255,255,255,.35)}
+.pm-stats{display:grid;grid-template-columns:repeat(3,1fr);background:#fff5f5;border-bottom:1px solid #ffcdd2;flex-shrink:0}
+.pm-stat{padding:12px 8px;text-align:center;border-right:1px solid #ffcdd2}.pm-stat:last-child{border-right:none}
+.pm-stat-val{font-size:15px;font-weight:900;color:#c62828;font-family:'Lexend',sans-serif}
+.pm-stat-lbl{font-size:9px;color:#8d5454;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.pm-body{overflow-y:auto;flex:1;padding:10px 14px}
+.pm-body::-webkit-scrollbar{width:3px}.pm-body::-webkit-scrollbar-thumb{background:#ffcdd2;border-radius:4px}
+.pm-sec{font-size:9px;font-weight:800;color:#8d5454;text-transform:uppercase;letter-spacing:.6px;margin:10px 0 6px}
+.pm-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:6px;cursor:pointer;transition:.15s;border:1px solid transparent}
+.pm-row:hover{background:#fff5f5;border-color:#ffcdd2}
+.pm-row-ico{font-size:18px;width:28px;text-align:center;flex-shrink:0}
+.pm-row-lbl{font-size:13px;font-weight:600;color:#1a0a0a;flex:1}
+.pm-row-sub{font-size:10px;color:#aaa;margin-top:1px}
+.pm-row-r{font-size:11px;color:#aaa}
+.pm-row-bdg{font-size:9px;font-weight:800;background:#c62828;color:white;padding:1px 7px;border-radius:50px}
+.pm-sw{width:36px;height:20px;background:#ddd;border-radius:10px;cursor:pointer;position:relative;transition:.3s;border:none;padding:0;flex-shrink:0}
+.pm-sw.on{background:#2e7d32}
+.pm-sw::after{content:"";position:absolute;width:14px;height:14px;background:white;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.pm-sw.on::after{left:19px}
+.pm-logout{width:100%;margin:12px 0 4px;padding:11px;border:1.5px solid #ffcdd2;border-radius:28px;background:white;color:#c62828;font-size:13px;font-weight:800;font-family:'Be Vietnam Pro',sans-serif;cursor:pointer;transition:.2s}
+.pm-logout:hover{background:#fff5f5}
+
+
+/* ── Modal chung ────────────────────────────── */
+.notif-modal-box,.profile-box{background:white;border-radius:18px;width:360px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.25);overflow:hidden}
+.notif-head{background:linear-gradient(135deg,var(--red),var(--red2));padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.notif-head-title{font-size:15px;font-weight:800;color:white;flex:1}
+.notif-close,.profile-close{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.2);cursor:pointer;color:white;font-size:14px;font-family:inherit}
+.notif-close:hover,.profile-close:hover{background:rgba(255,255,255,.35)}
+.notif-list{overflow-y:auto;flex:1;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);cursor:pointer;transition:.15s;position:relative}
+.notif-item:hover{background:var(--red5);border-color:var(--red4)}
+.notif-item.unread{background:#fff8f8;border-color:var(--red4)}
+.notif-item.unread::after{content:"";position:absolute;top:10px;right:10px;width:7px;height:7px;background:var(--red);border-radius:50%}
+.ni-ico{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ni-ico.promo{background:#fff3e0}.ni-ico.trip{background:#e8f5e9}.ni-ico.sys{background:#e3f2fd}.ni-ico.warn{background:#ffebee}
+.ni-title{font-size:12px;font-weight:700;color:var(--dark)}
+.ni-body{font-size:11px;color:#888;margin-top:2px;line-height:1.4}
+.ni-time{font-size:9px;color:#ccc;margin-top:4px;font-weight:600}
+.notif-footer{padding:10px 14px;border-top:1px solid var(--red5);text-align:center;flex-shrink:0}
+.notif-footer-btn{background:none;border:none;color:var(--red);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+/* Profile */
+.profile-hero{background:linear-gradient(135deg,var(--red),var(--red2));padding:20px 18px 22px;text-align:center;position:relative;flex-shrink:0}
+.profile-close{position:absolute;top:12px;right:12px}
+.profile-av{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#ff6f00,var(--gold));margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:34px;border:3px solid rgba(255,255,255,.4);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.profile-name{font-size:17px;font-weight:900;color:white;letter-spacing:-.5px}
+.profile-phone{font-size:11px;color:rgba(255,255,255,.7);margin-top:3px}
+.profile-level{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);padding:3px 12px;border-radius:50px;font-size:10px;font-weight:800;color:white;margin-top:8px}
+.profile-stats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--red5);flex-shrink:0}
+.pstat{padding:12px 8px;text-align:center;border-right:1px solid var(--red4)}
+.pstat:last-child{border-right:none}
+.pstat-val{font-size:15px;font-weight:900;color:var(--red)}
+.pstat-lbl{font-size:9px;color:var(--muted);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.profile-body{overflow-y:auto;flex:1;padding:12px 14px}
+.profile-body::-webkit-scrollbar{width:3px}
+.profile-body::-webkit-scrollbar-thumb{background:var(--red4);border-radius:4px}
+.psec{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 6px}
+.prow{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;cursor:pointer;transition:.15s;border:1px solid transparent}
+.prow:hover{background:var(--red5);border-color:var(--red4)}
+.prow-ico{font-size:18px;width:28px;text-align:center;flex-shrink:0}
+.prow-lbl{font-size:13px;font-weight:600;color:var(--dark);flex:1}
+.prow-sub{font-size:10px;color:#aaa;margin-top:1px}
+.prow-arr{font-size:11px;color:#aaa}
+.prow-badge{font-size:9px;font-weight:800;background:var(--red);color:white;padding:1px 7px;border-radius:50px}
+.pswitch{width:36px;height:20px;background:#ddd;border-radius:10px;cursor:pointer;position:relative;transition:.3s;flex-shrink:0;border:none;padding:0}
+.pswitch.on{background:var(--green)}
+.pswitch::after{content:"";position:absolute;width:14px;height:14px;background:white;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.pswitch.on::after{left:19px}
+.p-logout{width:100%;margin:12px 0 4px;padding:11px;border:1.5px solid var(--red4);border-radius:24px;background:white;color:var(--red);font-size:13px;font-weight:800;font-family:'Be Vietnam Pro',sans-serif;cursor:pointer;transition:.2s}
+.p-logout:hover{background:var(--red5)}
+
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+/* ── DARK MODE ── */
+body.dark-mode {
+  --surface: #1e1212;
+  --bg: #150a0a;
+  --text: #f5e0e0;
+  --text2: #d4a0a0;
+  --text3: #9a6868;
+  --line: rgba(198,40,40,.25);
+  --shadow: 0 2px 12px rgba(0,0,0,.4);
+  --shadow2: 0 8px 32px rgba(0,0,0,.5);
+  --red5: #2a0f0f;
+  --red4: #4a1515;
+  --gold2: #2a2000;
+  --green2: #0a2010;
+  --blue2: #0a1525;
+}
+body.dark-mode .panel,
+body.dark-mode .route-card,
+body.dark-mode .pay-section,
+body.dark-mode .route-sum,
+body.dark-mode .stats-grid .stat-box,
+body.dark-mode .track-bar,
+body.dark-mode .driver-card,
+body.dark-mode .live-card,
+body.dark-mode .modal,
+body.dark-mode .notif-modal-box,
+body.dark-mode .profile-modal,
+body.dark-mode .big-modal {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+  color: var(--text) !important;
+}
+body.dark-mode .r-input,
+body.dark-mode .tabs,
+body.dark-mode .btn-wrap {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+}
+body.dark-mode .tab {
+  background: var(--surface);
+  color: var(--text3);
+}
+body.dark-mode .tab.on { color: var(--red3); }
+body.dark-mode .xe-card { background: #1e1212 !important; border-color: var(--line) !important; }
+body.dark-mode .xe-card.on { background: linear-gradient(165deg,#2a0a0a,#1e0f0f) !important; }
+body.dark-mode .xe-nm, body.dark-mode .lc-name, body.dark-mode .dc-name,
+body.dark-mode .mpo-nm, body.dark-mode .po-nm, body.dark-mode .ts-label { color: var(--text) !important; }
+body.dark-mode .pay-opt { background: #1e1212 !important; border-color: var(--line) !important; }
+body.dark-mode .pay-opt.on { background: #2a0a0a !important; }
+body.dark-mode .mw-cond, body.dark-mode .lc-sub, body.dark-mode .lc-bien { color: var(--text3) !important; }
+body.dark-mode .map-weather-card, body.dark-mode .map-eta-card, body.dark-mode .map-route-info, body.dark-mode .map-traffic-legend {
+  background: #1e1212 !important;
+  border-color: var(--line) !important;
+}
+body.dark-mode .mw-temp { color: #64b5f6 !important; }
+body.dark-mode .mw-cond, body.dark-mode .mw-d { color: #9a9a9a !important; }
+body.dark-mode .mw-d b { color: #64b5f6 !important; }
+body.dark-mode .traffic-bar.light { background: #0a2010 !important; border-color: #1a5a20 !important; }
+body.dark-mode .traffic-bar.medium { background: #2a1a00 !important; border-color: #5a3a00 !important; }
+body.dark-mode .traffic-bar.heavy { background: #2a0a0a !important; border-color: var(--red4) !important; }
+body.dark-mode .sug-list, body.dark-mode .sug-item { background: #1e1212 !important; border-color: var(--line) !important; }
+body.dark-mode .sug-item:hover { background: #2a0a0a !important; }
+body.dark-mode .sug-nm { color: var(--text) !important; }
+body.dark-mode .promo-section { background: #1a1200 !important; border-color: #4a3a00 !important; }
+body.dark-mode .arr-stats, body.dark-mode .arr-rating { background: #1e1212 !important; }
+body.dark-mode .arr-stat-val { color: var(--text) !important; }
+body.dark-mode .arrived-card { border-color: #2e7d32 !important; }
+body.dark-mode .notif-item { background: #1e1212 !important; border-color: var(--line) !important; }
+body.dark-mode .notif-item.unread { background: #2a0a0a !important; }
+body.dark-mode .profile-body, body.dark-mode .pm-body { background: var(--surface) !important; }
+body.dark-mode .pm-stats, body.dark-mode .profile-stats { background: #2a0a0a !important; }
+body.dark-mode .pm-row, body.dark-mode .prow { color: var(--text) !important; }
+body.dark-mode .pm-row:hover, body.dark-mode .prow:hover { background: #2a0a0a !important; }
+body.dark-mode .pm-row-lbl, body.dark-mode .prow-lbl { color: var(--text) !important; }
+body.dark-mode input, body.dark-mode textarea {
+  background: #1e1212 !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+/* ── QR PAYMENT MODAL ── */
+.qr-modal-bg { position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px); }
+.qr-modal-bg.show { display:flex; }
+.qr-box { background:white;border-radius:20px;width:340px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.35); }
+.qr-head { padding:16px 20px;display:flex;align-items:center;gap:12px; }
+.qr-head-ico { font-size:28px; }
+.qr-head-title { font-family:'Lexend',sans-serif;font-size:16px;font-weight:900;flex:1; }
+.qr-head-sub { font-size:11px;opacity:.7; }
+.qr-close { width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center; }
+.qr-body { padding:0 20px 20px; }
+.qr-amount { text-align:center;padding:12px;border-radius:12px;margin-bottom:14px; }
+.qr-amount-lbl { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.7;margin-bottom:4px; }
+.qr-amount-val { font-family:'Lexend',sans-serif;font-size:26px;font-weight:900; }
+.qr-canvas-wrap { display:flex;justify-content:center;margin-bottom:14px; }
+.qr-canvas-wrap canvas { border-radius:12px; }
+.qr-info { display:flex;gap:8px;margin-bottom:14px; }
+.qr-info-item { flex:1;text-align:center;padding:8px;border-radius:10px; }
+.qr-info-lbl { font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;opacity:.6;margin-bottom:2px; }
+.qr-info-val { font-size:11px;font-weight:800; }
+.qr-timer { display:flex;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:700;margin-bottom:14px; }
+.qr-timer-icon { font-size:16px; }
+.qr-timer-bar { flex:1;height:4px;background:#eee;border-radius:2px;overflow:hidden; }
+.qr-timer-fill { height:100%;border-radius:2px;transition:width 1s linear; }
+.qr-btn { width:100%;padding:13px;border:none;border-radius:50px;color:white;font-size:14px;font-weight:800;font-family:'Lexend',sans-serif;cursor:pointer;transition:.2s; }
+.qr-btn:hover { opacity:.9;transform:translateY(-1px); }
+
+/* ── CALL MODAL ── */
+.call-modal-bg { position:fixed;inset:0;z-index:1300;display:none;align-items:center;justify-content:center; }
+.call-modal-bg.show { display:flex; }
+.call-bg-overlay { position:absolute;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px); }
+.call-box { position:relative;width:320px;border-radius:28px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.5); }
+.call-hero { padding:40px 24px 28px;text-align:center;position:relative; }
+.call-avatar { width:88px;height:88px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:44px;border:4px solid rgba(255,255,255,.3);box-shadow:0 0 0 12px rgba(255,255,255,.08); }
+.call-name { font-family:'Lexend',sans-serif;font-size:22px;font-weight:900;color:white;letter-spacing:-.5px; }
+.call-sub { font-size:12px;color:rgba(255,255,255,.65);margin-top:4px; }
+.call-status { display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);padding:5px 14px;border-radius:50px;font-size:11px;font-weight:700;color:white;margin-top:10px; }
+.call-status-dot { width:7px;height:7px;border-radius:50%;background:#4caf50;animation:blink 1s infinite; }
+.call-wave { display:flex;gap:4px;justify-content:center;align-items:flex-end;height:32px;margin:16px 0 8px; }
+.call-wave-bar { width:4px;border-radius:2px;background:rgba(255,255,255,.5);animation:wave-anim 1s ease-in-out infinite; }
+.call-wave-bar:nth-child(1) { animation-delay:0s; }
+.call-wave-bar:nth-child(2) { animation-delay:.1s; }
+.call-wave-bar:nth-child(3) { animation-delay:.2s; }
+.call-wave-bar:nth-child(4) { animation-delay:.3s; }
+.call-wave-bar:nth-child(5) { animation-delay:.2s; }
+.call-wave-bar:nth-child(6) { animation-delay:.1s; }
+@keyframes wave-anim { 0%,100%{height:6px;opacity:.3} 50%{height:28px;opacity:1} }
+.call-timer { font-family:'Lexend',sans-serif;font-size:20px;font-weight:700;color:rgba(255,255,255,.8);text-align:center;margin-bottom:20px;letter-spacing:2px; }
+.call-actions { display:flex;justify-content:center;gap:24px;padding:0 24px 36px; }
+.call-action-btn { width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;transition:.2s;position:relative; }
+.call-action-btn:hover { transform:scale(1.08); }
+.call-action-btn.end { background:#e53935;box-shadow:0 4px 20px rgba(229,57,53,.5); }
+.call-action-btn.mute { background:rgba(255,255,255,.2); }
+.call-action-btn.speaker { background:rgba(255,255,255,.2); }
+.call-action-lbl { position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:9px;color:rgba(255,255,255,.6);font-weight:700;white-space:nowrap; }
+
+/* ── CHAT MODAL ── */
+.chat-modal-bg { position:fixed;inset:0;z-index:1300;display:none;align-items:flex-end;justify-content:center; }
+.chat-modal-bg.show { display:flex; }
+.chat-overlay { position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px); }
+.chat-box { position:relative;width:400px;max-height:85vh;border-radius:24px 24px 0 0;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,.3);animation:slideUp .3s ease; }
+@keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.chat-head { padding:14px 16px;display:flex;align-items:center;gap:11px;flex-shrink:0; }
+.chat-av { width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0; }
+.chat-name { font-size:14px;font-weight:800;flex:1; }
+.chat-status { font-size:10px;font-weight:600;opacity:.7; }
+.chat-close { width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center; }
+.chat-msgs { flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;background:#f5f0f0;min-height:280px; }
+.chat-msg { max-width:75%;padding:10px 13px;border-radius:16px;font-size:12px;font-weight:500;line-height:1.5; }
+.chat-msg.driver { background:white;border-radius:4px 16px 16px 16px;align-self:flex-start;color:#1a0a0a;box-shadow:0 1px 4px rgba(0,0,0,.08); }
+.chat-msg.user { background:var(--red);color:white;border-radius:16px 4px 16px 16px;align-self:flex-end; }
+.chat-msg-time { font-size:9px;margin-top:3px;opacity:.5;font-weight:600; }
+.chat-quick-btns { display:flex;gap:6px;padding:8px 14px;overflow-x:auto;background:#f5f0f0;flex-shrink:0; }
+.chat-quick-btns::-webkit-scrollbar { height:0; }
+.chat-quick { flex-shrink:0;padding:6px 12px;border:1.5px solid var(--red4);border-radius:50px;background:white;font-size:10px;font-weight:700;color:var(--red);cursor:pointer;transition:.15s;white-space:nowrap; }
+.chat-quick:hover { background:var(--red5); }
+.chat-input-row { display:flex;gap:8px;padding:10px 14px;background:white;border-top:1px solid var(--red5);flex-shrink:0; }
+.chat-inp { flex:1;border:1.5px solid var(--red4);border-radius:50px;padding:9px 14px;font-size:12px;font-family:'Be Vietnam Pro',sans-serif;outline:none;color:var(--dark); }
+.chat-inp:focus { border-color:var(--red); }
+.chat-send-btn { width:40px;height:40px;border-radius:50%;border:none;background:var(--red);color:white;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0; }
+.chat-send-btn:hover { background:var(--red2);transform:scale(1.05); }
+
+/* ── NEW TRIP BUTTON (post-arrived) ── */
+.new-trip-btn { width:100%;margin-top:12px;padding:13px;border:none;border-radius:50px;background:linear-gradient(135deg,var(--red3),var(--red));color:white;font-size:14px;font-weight:800;font-family:'Lexend',sans-serif;cursor:pointer;box-shadow:0 5px 20px rgba(198,40,40,.35);transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px; }
+.new-trip-btn:hover { transform:translateY(-2px);box-shadow:0 8px 28px rgba(198,40,40,.45); }
+
+/* ── DRIVER SEPARATE ROUTE LINE ── */
+.driver-route-badge { display:inline-flex;align-items:center;gap:6px;background:#e3f2fd;border:1px solid #90caf9;padding:5px 12px;border-radius:50px;font-size:10px;font-weight:700;color:#1565c0;margin-bottom:6px; }
+</style>
+</head>
+<body>
+<!-- SPLASH SCREEN -->
+<div id="splash-screen" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#c62828,#7b0000);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:20px;font-family:'Lexend',sans-serif;">
+  <div style="text-align:center;color:white;">
+    <div style="font-size:64px;margin-bottom:8px">🛵</div>
+    <div style="font-size:42px;font-weight:900;letter-spacing:-2px">Viet<span style="color:#f9a825">Ride</span></div>
+    <div style="font-size:14px;opacity:.7;margin-top:6px;font-family:'Be Vietnam Pro',sans-serif">Đặt xe Việt Nam – Nhanh & Tiện</div>
+  </div>
+  <div style="background:rgba(255,255,255,.1);border-radius:20px;padding:28px 32px;width:320px;border:1px solid rgba(255,255,255,.2);">
+    <div style="color:white;font-size:18px;font-weight:800;margin-bottom:16px;text-align:center">Đăng nhập</div>
+    <input id="splash-phone" type="tel" placeholder="Số điện thoại" style="width:100%;padding:11px 14px;border-radius:10px;border:none;font-size:14px;font-family:'Be Vietnam Pro',sans-serif;margin-bottom:10px;outline:none"/>
+    <input id="splash-pass" type="password" placeholder="Mật khẩu" style="width:100%;padding:11px 14px;border-radius:10px;border:none;font-size:14px;font-family:'Be Vietnam Pro',sans-serif;margin-bottom:14px;outline:none"/>
+    <button onclick="splashLogin()" style="width:100%;padding:13px;background:#f9a825;color:#5d2000;border:none;border-radius:50px;font-size:15px;font-weight:800;font-family:'Lexend',sans-serif;cursor:pointer;">Đăng nhập 🚀</button>
+  </div>
+</div>
+
+<div class="app">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">Viet<span>Ride</span></div>
+  <div class="topbar-search">
+    <span class="ts-icon">🔍</span>
+    <input class="ts-inp" id="inp-search" placeholder="Tìm địa điểm, tỉnh thành…" oninput="filterSearch(this.value)" onfocus="filterSearch(this.value)" onblur="setTimeout(()=>{document.getElementById('search-drop').style.display='none'},200)" autocomplete="off"/>
+    <div id="search-drop"></div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" onclick="openPayModal()" title="Thanh toán">💳</button>
+    <button class="icon-btn" onclick="openPromoModal()" title="Khuyến mãi">🎁</button>
+    <button class="icon-btn" id="btn-notif" title="Thông báo" onclick="moModal('notif-modal')">🔔<span class="notif-dot" id="notif-dot"></span></button>
+    <button class="icon-btn" title="Tài khoản" onclick="moModal('profile-modal')">👤</button>
+  </div>
+</div>
+
+<div class="main">
+<!-- PANEL -->
+<div class="panel">
+  <div class="tabs">
+    <div class="tab on" id="tab-book" onclick="switchTab('book')">🛵 Đặt xe</div>
+    <div class="tab" id="tab-hist" onclick="switchTab('hist')">📋 Lịch sử</div>
+    <div class="tab" id="tab-sched" onclick="switchTab('sched')">📅 Lên lịch</div>
+  </div>
+
+  <!-- BOOKING TAB -->
+  <div class="panel-scroll" id="tab-content-book">
+    <!-- Route input -->
+    <div class="route-card">
+      <div class="route-row">
+        <div class="r-icon-wrap"><div class="r-dot-g"></div><div class="r-vline"></div></div>
+        <input class="r-input" id="inp-di" placeholder="📍 Điểm đón của bạn" oninput="onInp('di')" onfocus="showSug('di')" onblur="hideSug('di')" autocomplete="off"/>
+        <button class="r-clear" id="clr-di" onclick="clearField('di')">✕</button>
+      </div>
+      <div class="route-row" style="position:relative">
+        <div class="r-icon-wrap"><div class="r-dot-r"></div></div>
+        <input class="r-input" id="inp-den" placeholder="🏁 Bạn muốn đến đâu?" oninput="onInp('den')" onfocus="showSug('den')" onblur="hideSug('den')" autocomplete="off"/>
+        <button class="r-clear" id="clr-den" onclick="clearField('den')">✕</button>
+        <button class="swap-btn" onclick="swapRoute()">⇅</button>
+      </div>
+    </div>
+    <div id="sug-di" class="sug-wrap"></div>
+    <div id="sug-den" class="sug-wrap"></div>
+
+    <!-- Weather -->
+    <div class="weather-bar" id="weather-bar">
+      <div class="wb-ico" id="wb-ico">⏳</div>
+      <div class="wb-info">
+        <div class="wb-title" id="wb-title">Đang tải thời tiết…</div>
+        <div class="wb-sub">TP. Hồ Chí Minh</div>
+      </div>
+      <div>
+        <div class="wb-temp" id="wb-temp">--°C</div>
+        <div class="wb-wind" id="wb-wind">Gió --</div>
+      </div>
+    </div>
+
+    <!-- Traffic -->
+    <div class="traffic-bar medium" id="traffic-bar">
+      <div class="tb-dot"></div>
+      <div>
+        <div class="tb-txt" id="traffic-txt">Đang phân tích giao thông…</div>
+        <div class="tb-sub" id="traffic-sub">Đang cập nhật</div>
+      </div>
+    </div>
+
+    <!-- NetworkX path -->
+    <div id="sec-nx" style="display:none"></div>
+
+    <!-- Fuzzy Logic Box -->
+    <div id="sec-fuzzy" style="display:none">
+      <div class="fuzzy-box">
+        <div class="fz-header">
+          <span style="font-size:16px">🧠</span>
+          <div class="fz-title">Fuzzy Logic – Điều chỉnh giá động</div>
+          <div class="fz-toggle" onclick="toggleFuzzyDetail()">▼ Chi tiết</div>
+        </div>
+        <div id="fuzzy-factors" class="fz-factors"></div>
+        <div id="fuzzy-multipliers" class="fz-multipliers"></div>
+        <div id="fz-detail" class="fz-detail">
+          <div class="fz-chart-title">📊 Mức độ thành viên (Membership)</div>
+          <div class="fz-bars" id="fuzzy-bars"></div>
+          <div class="fz-chart-title" style="margin-top:10px">🔬 Ma trận membership</div>
+          <div class="fz-mem-grid" id="fuzzy-mem-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Xe selection -->
+    <div id="sec-xe" style="display:none">
+      <!-- Step 1: Category picker -->
+      <div id="xe-cat-pick">
+        <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">🚗 Loại hình dịch vụ</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div id="cat-btn-passenger" onclick="pickCat('passenger')" style="border:2px solid var(--line);border-radius:16px;padding:18px 12px;background:white;cursor:pointer;text-align:center;transition:.2s">
+            <div style="font-size:32px;margin-bottom:8px">🛵</div>
+            <div style="font-size:13px;font-weight:800;color:var(--dark)">Đặt xe</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">Xe máy, ô tô, taxi…</div>
+          </div>
+          <div id="cat-btn-cargo" onclick="pickCat('cargo')" style="border:2px solid var(--line);border-radius:16px;padding:18px 12px;background:white;cursor:pointer;text-align:center;transition:.2s">
+            <div style="font-size:32px;margin-bottom:8px">📦</div>
+            <div style="font-size:13px;font-weight:800;color:var(--dark)">Giao hàng</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">Xe máy, van, xe tải…</div>
+          </div>
+        </div>
+      </div>
+      <!-- Step 2: Vehicle list -->
+      <div id="xe-list-wrap" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <button onclick="backToCat()" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--red4);background:white;cursor:pointer;color:var(--red);font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">‹</button>
+          <div id="xe-list-title" style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px"></div>
+        </div>
+        <div style="display:flex;gap:8px;overflow-x:auto;padding:12px 2px 6px;margin-top:-4px" id="xe-list-inner"></div>
+      </div>
+    </div>
+
+    <!-- Promo -->
+    <div class="promo-section" id="sec-promo" style="display:none">
+      <div class="promo-header" onclick="togglePromoInput()">
+        <span style="font-size:20px">🎁</span>
+        <div>
+          <div class="promo-lbl" id="promo-lbl">Nhập mã khuyến mãi</div>
+          <div class="promo-sub" id="promo-sub">Tiết kiệm đến 50%</div>
+        </div>
+        <span id="promo-arrow" style="margin-left:auto;font-size:18px;color:#fb8c00">›</span>
+      </div>
+      <div id="promo-input-area" style="display:none">
+        <div class="promo-input-row">
+          <input class="promo-inp" id="promo-inp" placeholder="NHẬP MÃ…" maxlength="12" oninput="this.value=this.value.toUpperCase()"/>
+          <button class="promo-apply-btn" onclick="applyPromo()">Áp dụng</button>
+        </div>
+        <div class="promo-result" id="promo-result"></div>
+        <div class="promo-tags">
+          <div class="promo-tag" onclick="fillPromo('VIRIDE10')">VIRIDE10</div>
+          <div class="promo-tag" onclick="fillPromo('HCM20')">HCM20</div>
+          <div class="promo-tag" onclick="fillPromo('NEWUSER')">NEWUSER</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment quick -->
+    <div class="pay-section" id="sec-pay" style="display:none">
+      <div class="pay-ttl">💳 Phương thức thanh toán</div>
+      <div class="pay-opts" id="pay-opts-quick"></div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <div class="loading-txt">Đang tính lộ trình tối ưu…</div>
+      <div class="loading-step" id="loading-step">Kết nối OSRM routing…</div>
+    </div>
+
+    <!-- Results -->
+    <div class="kq" id="kq"></div>
+  </div>
+
+  <!-- HISTORY TAB (hidden by default) -->
+  <div class="panel-scroll" id="tab-content-hist" style="display:none">
+    <div class="hist-empty">
+      <div class="hist-ico">📋</div>
+      <div class="hist-txt">Chưa có chuyến nào<br><span style="font-size:11px;color:#ddd">Đặt xe ngay để bắt đầu!</span></div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE TAB (hidden by default) -->
+  <div class="panel-scroll" id="tab-content-sched" style="display:none">
+    <div class="hist-empty">
+      <div class="hist-ico">📅</div>
+      <div class="hist-txt">Tính năng đang phát triển<br><span style="font-size:11px;color:#ddd">Sẽ ra mắt sớm!</span></div>
+    </div>
+  </div>
+
+  <div class="btn-wrap" id="btn-wrap">
+    <button class="btn-dat" id="btn-dat" onclick="datXe()" disabled>📍 Chọn điểm đi và điểm đến</button>
+  </div>
+</div>
+
+<!-- MAP -->
+<div class="map-wrap">
+  <div id="osm-map" style="width:100%;height:100%;"></div>
+
+  <!-- Left: Traffic legend -->
+  <div class="map-traffic-legend">
+    <div class="tl-title">🚦 Giao thông</div>
+    <div class="tl-item"><div class="tl-dot" style="background:#43a047"></div>Thông thoáng</div>
+    <div class="tl-item"><div class="tl-dot" style="background:#fb8c00"></div>Hơi kẹt</div>
+    <div class="tl-item"><div class="tl-dot" style="background:#e53935"></div>Kẹt xe nặng</div>
+    <div style="font-size:9px;color:#888;margin-top:4px;font-weight:600" id="tl-time">--:--</div>
+  </div>
+
+  <!-- Right: Weather + ETA -->
+  <div class="map-topbar">
+    <div class="map-weather-card">
+      <div class="mw-row">
+        <div class="mw-ico" id="mw-ico">⏳</div>
+        <div>
+          <div class="mw-temp" id="mw-temp">--°C</div>
+          <div class="mw-cond" id="mw-cond">Đang tải…</div>
+        </div>
+      </div>
+      <div class="mw-details">
+        <div class="mw-d"><b id="mw-hum">--%</b>Độ ẩm</div>
+        <div class="mw-d"><b id="mw-wind">--</b>Gió km/h</div>
+        <div class="mw-d"><b id="mw-rain">--%</b>Mưa</div>
+      </div>
+    </div>
+    <div class="map-eta-card" id="map-eta">
+      <div class="mo-lbl">⏱ Thời gian dự kiến</div>
+      <div class="mo-val" id="eta-min">-- phút</div>
+      <div class="mo-sub" id="eta-sub">--</div>
+    </div>
+  </div>
+
+  <!-- Bottom: Route info -->
+  <div class="map-bottom">
+    <div class="map-route-info" id="map-route-info">
+      <div class="mri-badge">🗺 Lộ trình</div>
+      <div class="mri-sep"></div>
+      <div class="mri-item"><div class="mri-val" id="mri-km">--</div><div class="mri-lbl">km</div></div>
+      <div class="mri-sep"></div>
+      <div class="mri-item"><div class="mri-val" id="mri-time">--</div><div class="mri-lbl">phút</div></div>
+      <div class="mri-sep"></div>
+      <div class="mri-item"><div class="mri-val" id="mri-arrive">--</div><div class="mri-lbl">đến nơi</div></div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- PAY MODAL -->
+<div class="modal-bg" id="pay-modal">
+  <div class="modal">
+    <h3>💳 Phương thức thanh toán</h3>
+    <div id="modal-pay-opts"></div>
+    <button class="modal-btn" onclick="closeModal('pay-modal')">Xác nhận</button>
+  </div>
+</div>
+
+<!-- PROMO MODAL -->
+<div class="modal-bg" id="promo-modal">
+  <div class="modal">
+    <h3>🎁 Mã khuyến mãi VietRide</h3>
+    <p style="font-size:11px;color:#888;margin-bottom:4px">Nhấn vào mã để áp dụng ngay</p>
+    <div class="promo-codes-grid" id="promo-codes-grid"></div>
+    <button class="modal-btn" style="background:linear-gradient(135deg,#ff6f00,#e65100)" onclick="closeModal('promo-modal')">Đóng</button>
+  </div>
+</div>
+
+
+<!-- EXTRA MODALS -->
+
+<!-- NOTIFICATION MODAL -->
+<div class="modal-bg" id="notif-modal" onclick="if(event.target===this)closeModal('notif-modal')">
+  <div class="big-modal">
+    <div class="bm-head">
+      <div class="bm-head-ico">🔔</div>
+      <div class="bm-head-title">Thông báo <span id="notif-count" style="background:rgba(255,255,255,.25);padding:1px 8px;border-radius:50px;font-size:11px"></span></div>
+      <button class="bm-close" onclick="closeModal('notif-modal')">✕</button>
+    </div>
+    <div class="bm-body" id="notif-list"></div>
+    <div class="bm-footer">
+      <button class="bm-footer-btn" onclick="markAllRead()">✓ Đánh dấu tất cả đã đọc</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-bg" id="profile-modal" onclick="if(event.target===this)closeModal('profile-modal')">
+  <div class="profile-modal">
+    <div class="pm-hero">
+      <button class="pm-close2" onclick="closeModal('profile-modal')">✕</button>
+      <div class="pm-av">😊</div>
+      <div class="pm-name">Nguyễn Văn An</div>
+      <div class="pm-phone">📱 0912 345 678</div>
+      <div class="pm-level">⭐ Thành viên Vàng</div>
+    </div>
+    <div class="pm-stats">
+      <div class="pm-stat"><div class="pm-stat-val" id="pm-trips">0</div><div class="pm-stat-lbl">Chuyến</div></div>
+      <div class="pm-stat"><div class="pm-stat-val" id="pm-km">0</div><div class="pm-stat-lbl">Km</div></div>
+      <div class="pm-stat"><div class="pm-stat-val" id="pm-saved">0K</div><div class="pm-stat-lbl">Tiết kiệm</div></div>
+    </div>
+    <div class="pm-body">
+      <div class="pm-sec">Tài khoản</div>
+      <div class="pm-row" onclick="openProfileEdit()"><div class="pm-row-ico">👤</div><div><div class="pm-row-lbl">Thông tin cá nhân</div><div class="pm-row-sub">Tên, SĐT, email</div></div><div class="pm-row-r">›</div></div>
+      <div class="pm-row" onclick="openPayModal();closeModal('profile-modal')"><div class="pm-row-ico">💳</div><div><div class="pm-row-lbl">Thanh toán</div><div class="pm-row-sub" id="pm-pay-sub">Tiền mặt</div></div><div class="pm-row-r">›</div></div>
+      <div class="pm-row" onclick="openPromoModal();closeModal('profile-modal')"><div class="pm-row-ico">🎁</div><div><div class="pm-row-lbl">Ưu đãi & Mã giảm giá</div><div class="pm-row-sub">4 mã hiệu lực</div></div><span class="pm-row-bdg">4</span></div>
+      <div class="pm-sec">Chuyến đi</div>
+      <div class="pm-row" onclick="closeModal('profile-modal');switchTab('hist')"><div class="pm-row-ico">📋</div><div><div class="pm-row-lbl">Lịch sử chuyến đi</div><div class="pm-row-sub" id="pm-hist-sub">0 chuyến</div></div><div class="pm-row-r">›</div></div>
+      <div class="pm-row" onclick="closeModal('profile-modal');switchTab('sched')"><div class="pm-row-ico">📅</div><div><div class="pm-row-lbl">Đặt xe theo lịch</div><div class="pm-row-sub">Lên lịch trước</div></div><div class="pm-row-r">›</div></div>
+      <div class="pm-sec">Cài đặt</div>
+      <div class="pm-row"><div class="pm-row-ico">🔔</div><div style="flex:1"><div class="pm-row-lbl">Thông báo</div><div class="pm-row-sub">Nhận thông báo chuyến đi</div></div><button class="pm-sw on" id="sw-notif" onclick="toggleSw('sw-notif')"></button></div>
+      <div class="pm-row"><div class="pm-row-ico">🌙</div><div style="flex:1"><div class="pm-row-lbl">Chế độ tối</div><div class="pm-row-sub">Giao diện tối</div></div><button class="pm-sw" id="sw-dark" onclick="toggleSw('sw-dark')"></button></div>
+      <div class="pm-row" onclick="alert('Phiên bản VietRide 2.0.1')"><div class="pm-row-ico">ℹ️</div><div><div class="pm-row-lbl">Về VietRide</div><div class="pm-row-sub">Phiên bản 2.0.1</div></div><div class="pm-row-r">›</div></div>
+      <button class="pm-logout" onclick="doLogout()">🚪 Đăng xuất</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR PAYMENT MODAL -->
+<div class="qr-modal-bg" id="qr-modal" onclick="if(event.target===this)closeQR()">
+  <div class="qr-box" id="qr-box">
+    <div class="qr-head" id="qr-head">
+      <div class="qr-head-ico" id="qr-ico">💳</div>
+      <div style="flex:1"><div class="qr-head-title" id="qr-title">Thanh toán</div><div class="qr-head-sub" id="qr-sub">Quét mã QR</div></div>
+      <button class="qr-close" id="qr-close-btn" onclick="closeQR()">✕</button>
+    </div>
+    <div class="qr-body">
+      <div class="qr-amount" id="qr-amount-box">
+        <div class="qr-amount-lbl">Số tiền thanh toán</div>
+        <div class="qr-amount-val" id="qr-amount-val">--</div>
+      </div>
+      <div class="qr-canvas-wrap"><canvas id="qr-canvas" width="200" height="200"></canvas></div>
+      <div class="qr-info" id="qr-info">
+        <div class="qr-info-item" id="qr-box1"><div class="qr-info-lbl">Mã chuyến</div><div class="qr-info-val" id="qr-tripid">VR-XXXX</div></div>
+        <div class="qr-info-item" id="qr-box2"><div class="qr-info-lbl">Tài khoản</div><div class="qr-info-val" id="qr-account">0912345678</div></div>
+        <div class="qr-info-item" id="qr-box3"><div class="qr-info-lbl">Hiệu lực</div><div class="qr-info-val" id="qr-expire">5:00</div></div>
+      </div>
+      <div class="qr-timer">
+        <span class="qr-timer-icon">⏱</span>
+        <span id="qr-timer-txt" style="font-size:11px;font-weight:700">Mã hết hạn sau </span>
+        <div class="qr-timer-bar"><div class="qr-timer-fill" id="qr-timer-fill" style="width:100%"></div></div>
+      </div>
+      <button class="qr-btn" id="qr-confirm-btn" onclick="confirmQRPayment()">✓ Xác nhận đã thanh toán</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE EDIT MODAL -->
+<div class="modal-bg" id="profile-edit-modal" onclick="if(event.target===this)closeModal('profile-edit-modal')">
+  <div class="modal" style="max-width:380px;border-radius:20px;padding:0;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#c62828,#b71c1c);padding:20px;display:flex;align-items:center;gap:12px">
+      <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:26px">😊</div>
+      <div style="color:white"><div style="font-size:16px;font-weight:800;font-family:Lexend,sans-serif">Thông tin cá nhân</div><div style="font-size:11px;opacity:.7;margin-top:2px">Chỉnh sửa hồ sơ</div></div>
+      <button onclick="closeModal('profile-edit-modal')" style="margin-left:auto;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.2);color:white;cursor:pointer;font-size:14px">✕</button>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#8d5454;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Họ và tên</div>
+        <input id="edit-name" type="text" style="width:100%;padding:10px 13px;border:1.5px solid rgba(198,40,40,.2);border-radius:10px;font-size:13px;font-family:Be Vietnam Pro,sans-serif;outline:none" onfocus="this.style.borderColor='#c62828'" onblur="this.style.borderColor='rgba(198,40,40,.2)'"/>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#8d5454;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Số điện thoại</div>
+        <input id="edit-phone" type="tel" style="width:100%;padding:10px 13px;border:1.5px solid rgba(198,40,40,.2);border-radius:10px;font-size:13px;font-family:Be Vietnam Pro,sans-serif;outline:none" onfocus="this.style.borderColor='#c62828'" onblur="this.style.borderColor='rgba(198,40,40,.2)'"/>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#8d5454;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Email</div>
+        <input id="edit-email" type="email" style="width:100%;padding:10px 13px;border:1.5px solid rgba(198,40,40,.2);border-radius:10px;font-size:13px;font-family:Be Vietnam Pro,sans-serif;outline:none" onfocus="this.style.borderColor='#c62828'" onblur="this.style.borderColor='rgba(198,40,40,.2)'"/>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#8d5454;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Ngày sinh</div>
+        <input id="edit-dob" type="date" style="width:100%;padding:10px 13px;border:1.5px solid rgba(198,40,40,.2);border-radius:10px;font-size:13px;font-family:Be Vietnam Pro,sans-serif;outline:none" onfocus="this.style.borderColor='#c62828'" onblur="this.style.borderColor='rgba(198,40,40,.2)'"/>
+      </div>
+      <button onclick="saveProfileEdit()" style="width:100%;padding:12px;background:linear-gradient(135deg,#c62828,#b71c1c);color:white;border:none;border-radius:50px;font-size:14px;font-weight:800;font-family:Lexend,sans-serif;cursor:pointer;margin-top:4px">💾 Lưu thay đổi</button>
+    </div>
+  </div>
+</div>
+
+<!-- CALL MODAL -->
+<div class="call-modal-bg" id="call-modal">
+  <div class="call-bg-overlay" onclick="closeCall()"></div>
+  <div class="call-box" id="call-box">
+    <div class="call-hero" id="call-hero">
+      <div class="call-avatar" id="call-avatar">👨</div>
+      <div class="call-name" id="call-name">Tài xế</div>
+      <div class="call-sub" id="call-vehicle">Xe máy • 51B-123.45</div>
+      <div class="call-status"><div class="call-status-dot"></div><span id="call-status-txt">Đang kết nối…</span></div>
+    </div>
+    <div class="call-wave" id="call-wave">
+      <div class="call-wave-bar"></div><div class="call-wave-bar"></div>
+      <div class="call-wave-bar"></div><div class="call-wave-bar"></div>
+      <div class="call-wave-bar"></div><div class="call-wave-bar"></div>
+    </div>
+    <div class="call-timer" id="call-timer">0:00</div>
+    <div class="call-actions">
+      <button class="call-action-btn mute" id="call-mute" onclick="toggleMute()" title="Tắt mic">🎤<span class="call-action-lbl">Mic</span></button>
+      <button class="call-action-btn end" onclick="closeCall()" title="Kết thúc">📵<span class="call-action-lbl">Cúp máy</span></button>
+      <button class="call-action-btn speaker" onclick="toggleSpeaker()" title="Loa ngoài">🔊<span class="call-action-lbl">Loa</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT MODAL -->
+<div class="chat-modal-bg" id="chat-modal">
+  <div class="chat-overlay" onclick="closeChat()"></div>
+  <div class="chat-box" id="chat-box">
+    <div class="chat-head" id="chat-head">
+      <div class="chat-av" id="chat-av">👨</div>
+      <div style="flex:1"><div class="chat-name" id="chat-driver-name">Tài xế</div><div class="chat-status">🟢 Đang hoạt động</div></div>
+      <button class="chat-close" id="chat-close-btn" onclick="closeChat()">✕</button>
+    </div>
+    <div class="chat-msgs" id="chat-msgs"></div>
+    <div class="chat-quick-btns">
+      <button class="chat-quick" onclick="sendQuick('Tôi đang ở chỗ nào vậy?')">📍 Tôi đang ở đâu?</button>
+      <button class="chat-quick" onclick="sendQuick('Bạn sắp đến chưa?')">⏰ Sắp đến chưa?</button>
+      <button class="chat-quick" onclick="sendQuick('Tôi mặc áo đỏ nha!')">👕 Nhận dạng tôi</button>
+      <button class="chat-quick" onclick="sendQuick('OK tôi hiểu rồi!')">👍 OK!</button>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-inp" id="chat-inp" placeholder="Nhắn tin tới tài xế…" onkeydown="if(event.key==='Enter')sendChatMsg()"/>
+      <button class="chat-send-btn" onclick="sendChatMsg()">➤</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// KEY: avoid sc_close literally in this file — use SC_OPEN / SC_CLOSE variables
+var SC_OPEN  = '\x3cscript ';
+var SC_CLOSE = '\x3c/script\x3e';
+
+// ════════════════════════════════════════════════════════════
+// FUZZY LOGIC ENGINE  (skfuzzy-style: trapezoid + triangle MFs, centroid defuzz)
+// ════════════════════════════════════════════════════════════
+var Fuzzy = {
+  trap: function(x,a,b,c,d){ if(x<=a||x>=d)return 0; if(x>=b&&x<=c)return 1; if(x<b)return(x-a)/(b-a); return(d-x)/(d-c); },
+  tri:  function(x,a,b,c){   if(x<=a||x>=c)return 0; if(x<b)return(x-a)/(b-a); return(c-x)/(c-b); },
+
+  // ── INPUT FUZZIFICATION ──────────────────────────────────
+  fuzzTraffic: function(ti){
+    return { clear:this.trap(ti,-0.5,0,0.3,0.7), medium:this.tri(ti,0.3,1,1.7), heavy:this.trap(ti,1.4,1.7,2.5,3) };
+  },
+  fuzzWeather: function(ws){
+    return { good:this.trap(ws,-0.5,0,0.5,1.2), cloudy:this.tri(ws,0.5,1,1.8), rainy:this.tri(ws,1.2,2,2.8), storm:this.trap(ws,2.4,2.8,4,4.5) };
+  },
+  fuzzTime: function(h){
+    var mp=this.trap(h,6.5,7,9,9.5), ep=this.trap(h,16.5,17,19,19.5);
+    var nt=Math.max(this.trap(h,21.5,22,25,25.5),this.trap(h,-0.5,0,5,5.5));
+    return {morningPeak:mp, eveningPeak:ep, nightTime:nt, offPeak:Math.max(0,1-Math.max(mp,ep,nt))};
+  },
+  // ── VEHICLE SPEED FACTOR (skfuzzy-style per vehicle type) ─
+  // bicycle: 15 km/h, bike: 35 km/h, car: 50 km/h, cargo: 30 km/h
+  SPEED: {bicycle:15, bike:35, car4:50, car7:45, elec:40, taxi:48, cargo_bike:28, cargo_van:38, cargo_truck:50},
+
+  // ── DEFUZZIFICATION (centroid / weighted average) ─────────
+  defuzz: function(rules){ var n=0,d=0; rules.forEach(function(r){n+=r.v*r.w;d+=r.w;}); return d>0?n/d:1; },
+
+  // ── MAIN COMPUTE ──────────────────────────────────────────
+  compute: function(ti,ws,h,dist,xeId){
+    var tf=this.fuzzTraffic(ti), wf=this.fuzzWeather(ws), tm=this.fuzzTime(h);
+    var spd = this.SPEED[xeId] || 35; // km/h base speed
+
+    // Price rules
+    var PR=[
+      {v:1.00,w:tf.clear},{v:1.15,w:tf.medium},{v:1.35,w:tf.heavy},
+      {v:1.00,w:wf.good},{v:1.05,w:wf.cloudy},{v:1.25,w:wf.rainy},{v:1.45,w:wf.storm},
+      {v:1.20,w:tm.morningPeak},{v:1.20,w:tm.eveningPeak},{v:0.90,w:tm.nightTime},{v:1.00,w:tm.offPeak},
+      {v:dist>20?0.92:1.0,w:0.5}
+    ];
+    // Time (speed penalty) rules — slow vehicles get extra penalty
+    var slowFactor = spd < 20 ? 1.4 : (spd < 30 ? 1.2 : 1.0);
+    var TR=[
+      {v:1.00*slowFactor,w:tf.clear},{v:1.35*slowFactor,w:tf.medium},{v:1.75*slowFactor,w:tf.heavy},
+      {v:1.00,w:wf.good},{v:1.05,w:wf.cloudy},{v:1.20,w:wf.rainy},{v:1.40,w:wf.storm},
+      {v:1.30,w:tm.morningPeak},{v:1.30,w:tm.eveningPeak},{v:0.85,w:tm.nightTime},{v:1.00,w:tm.offPeak}
+    ];
+    var pm=Math.max(0.85,Math.min(1.7,this.defuzz(PR)));
+    var tmm=Math.max(0.80,Math.min(2.5,this.defuzz(TR)));
+    return {priceMultiplier:pm, timeMultiplier:tmm, baseSpeed:spd, tf:tf, wf:wf, timef:tm, factors:this._factors(tf,wf,tm)};
+  },
+  _factors:function(tf,wf,tm){
+    var f=[];
+    if(tf.heavy>0.5) f.push({l:"Kẹt xe nặng",i:"+35% giá,+75% TG",bad:true});
+    else if(tf.medium>0.5) f.push({l:"Giao thông vừa",i:"+15% giá,+35% TG",bad:false});
+    else f.push({l:"Đường thông thoáng",i:"Giá chuẩn",bad:false});
+    if(wf.storm>0.5) f.push({l:"Bão/Mưa to",i:"+45% giá",bad:true});
+    else if(wf.rainy>0.5) f.push({l:"Trời mưa",i:"+25% giá,+20% TG",bad:true});
+    else if(wf.cloudy>0.5) f.push({l:"Có mây",i:"+5% giá",bad:false});
+    else f.push({l:"Thời tiết tốt",i:"Không ảnh hưởng",bad:false});
+    if(tm.morningPeak>0.5||tm.eveningPeak>0.5) f.push({l:"Giờ cao điểm",i:"+20% giá,+30% TG",bad:true});
+    else if(tm.nightTime>0.5) f.push({l:"Giờ đêm",i:"-10% giá, nhanh hơn",bad:false});
+    return f;
+  }
+};
+
+// ════════════════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════════════════
+var TINH = [
+  {id:"hcm",n:"TP. Hồ Chí Minh",ll:[10.7769,106.7009],pl:[
+    {n:"Bến Thành",a:"Quận 1",i:"🏛",ll:[10.7724,106.6981]},
+    {n:"Nhà Thờ Đức Bà",a:"Quận 1",i:"⛪",ll:[10.7797,106.6990]},
+    {n:"Landmark 81",a:"Bình Thạnh",i:"🏙",ll:[10.7951,106.7220]},
+    {n:"Sân bay Tân Sơn Nhất",a:"Tân Bình",i:"✈️",ll:[10.8181,106.6520]},
+    {n:"Ga Sài Gòn",a:"Quận 3",i:"🚉",ll:[10.7808,106.6826]},
+    {n:"Bến xe Miền Đông",a:"Bình Thạnh",i:"🚌",ll:[10.8148,106.7148]},
+    {n:"Bến xe Miền Tây",a:"Bình Tân",i:"🚌",ll:[10.7375,106.6138]},
+    {n:"Phú Mỹ Hưng",a:"Quận 7",i:"🏘",ll:[10.7243,106.7184]},
+    {n:"ĐH Quốc gia HCM",a:"Thủ Đức",i:"🎓",ll:[10.8808,106.8021]},
+    {n:"ĐH Bách Khoa HCM",a:"Quận 10",i:"🎓",ll:[10.7721,106.6579]},
+    {n:"BV Chợ Rẫy",a:"Quận 5",i:"🏥",ll:[10.7558,106.6626]},
+    {n:"AEON Mall Tân Phú",a:"Tân Phú",i:"🛍",ll:[10.7959,106.6257]},
+    {n:"Vincom Đồng Khởi",a:"Quận 1",i:"🛍",ll:[10.7779,106.7040]},
+    {n:"Thảo Cầm Viên",a:"Quận 1",i:"🦒",ll:[10.7882,106.7062]},
+    {n:"Đầm Sen",a:"Quận 11",i:"🎡",ll:[10.7611,106.6427]},
+    {n:"Suối Tiên",a:"Thủ Đức",i:"🎢",ll:[10.8668,106.8282]},
+    {n:"Củ Chi",a:"Huyện Củ Chi",i:"🌿",ll:[11.0059,106.5280]},
+    {n:"Cần Giờ",a:"Huyện Cần Giờ",i:"🌊",ll:[10.4122,106.9553]},
+  ]},
+  {id:"hanoi",n:"Hà Nội",ll:[21.0285,105.8542],pl:[
+    {n:"Hoàn Kiếm",a:"Hà Nội",i:"🏛",ll:[21.0286,105.8533]},
+    {n:"Hồ Gươm",a:"Hà Nội",i:"🌊",ll:[21.0283,105.8521]},
+    {n:"Sân bay Nội Bài",a:"Hà Nội",i:"✈️",ll:[21.2187,105.8037]},
+    {n:"Văn Miếu",a:"Hà Nội",i:"🏛",ll:[21.0275,105.8355]},
+  ]},
+  {id:"danang",n:"Đà Nẵng",ll:[16.0544,108.2022],pl:[
+    {n:"Bãi biển Mỹ Khê",a:"Đà Nẵng",i:"🏖",ll:[16.0588,108.2472]},
+    {n:"Cầu Rồng",a:"Đà Nẵng",i:"🐉",ll:[16.0610,108.2274]},
+    {n:"Sân bay Đà Nẵng",a:"Đà Nẵng",i:"✈️",ll:[16.0439,108.1993]},
+    {n:"Bà Nà Hills",a:"Hòa Vang",i:"🏔",ll:[15.9997,107.9888]},
+  ]},
+  {id:"cantho",n:"Cần Thơ",ll:[10.0452,105.7469],pl:[
+    {n:"Bến Ninh Kiều",a:"Cần Thơ",i:"🚢",ll:[10.0452,105.7469]},
+    {n:"Chợ nổi Cái Răng",a:"Cần Thơ",i:"🛶",ll:[10.0100,105.7600]},
+  ]},
+  {id:"nhatrang",n:"Nha Trang",ll:[12.2388,109.1967],pl:[
+    {n:"Vinpearl Nha Trang",a:"Nha Trang",i:"🎡",ll:[12.2208,109.1996]},
+    {n:"Tháp Bà Ponagar",a:"Nha Trang",i:"🏛",ll:[12.2677,109.1940]},
+  ]},
+  {id:"dalat",n:"Đà Lạt",ll:[11.9404,108.4583],pl:[
+    {n:"Hồ Xuân Hương",a:"Đà Lạt",i:"🌊",ll:[11.9440,108.4375]},
+    {n:"Thung lũng Tình Yêu",a:"Đà Lạt",i:"💕",ll:[12.0000,108.4500]},
+  ]},
+  {id:"vungtau",n:"Vũng Tàu",ll:[10.3460,107.0840],pl:[
+    {n:"Bãi Sau Vũng Tàu",a:"Vũng Tàu",i:"🏖",ll:[10.3238,107.0945]},
+    {n:"Tượng Chúa Kitô",a:"Vũng Tàu",i:"🗿",ll:[10.3396,107.0849]},
+  ]},
+  {id:"hoian",n:"Hội An",ll:[15.8801,108.3380],pl:[
+    {n:"Phố Cổ Hội An",a:"Hội An",i:"🏮",ll:[15.8801,108.3380]},
+    {n:"Bãi An Bàng",a:"Hội An",i:"🏖",ll:[15.9087,108.3683]},
+  ]},
+  {id:"hue",n:"Huế",ll:[16.4637,107.5909],pl:[
+    {n:"Đại Nội Huế",a:"Huế",i:"🏯",ll:[16.4701,107.5777]},
+    {n:"Lăng Tự Đức",a:"Huế",i:"🏛",ll:[16.4573,107.5531]},
+  ]},
+  {id:"binhduong",n:"Bình Dương",ll:[11.1425,106.8785],pl:[
+    {n:"Thủ Dầu Một",a:"Bình Dương",i:"🏙",ll:[10.9800,106.6519]},
+    {n:"AEON Mall Bình Dương",a:"Bình Dương",i:"🛍",ll:[10.9805,106.7009]},
+  ]},
+  {id:"dongnai",n:"Đồng Nai",ll:[10.9452,107.0860],pl:[
+    {n:"Biên Hòa",a:"Đồng Nai",i:"🏙",ll:[10.9452,106.8228]},
+  ]},
+];
+var ALL_PLACES=[];
+TINH.forEach(function(t){
+  ALL_PLACES.push({n:"Trung tâm "+t.n,a:t.n,i:"📍",ll:t.ll,tinh:t.n});
+  t.pl.forEach(function(p){ ALL_PLACES.push(Object.assign({},p,{tinh:t.n})); });
+});
+var GRAPH={};
+TINH.forEach(function(a){
+  GRAPH[a.id]=[];
+  TINH.forEach(function(b){
+    if(a.id===b.id)return;
+    var d=haversine(a.ll,b.ll);
+    if(d<=300)GRAPH[a.id].push({id:b.id,w:d});
+  });
+});
+
+// ════════════════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════════════════
+var PROMO_CODES={
+  "VIRIDE10":{discount:.10,desc:"Giảm 10% toàn bộ chuyến",maxDiscount:30000,type:"percent",badge:"Phổ biến"},
+  "HCM20":   {discount:.20,desc:"Giảm 20% nội thành HCM",  maxDiscount:50000,type:"percent",badge:"HCM"},
+  "NEWUSER": {discount:.50,desc:"Giảm 50% lần đầu dùng",   maxDiscount:80000,type:"percent",badge:"Mới"},
+  "CARGO15": {discount:.15,desc:"Giảm 15% giao hàng",       maxDiscount:40000,type:"percent",badge:"Hàng"},
+};
+var PAY_OPTS=[
+  {id:"cash",   ico:"💵",nm:"Tiền mặt",  sub:"Thanh toán khi đến nơi"},
+  {id:"momo",   ico:"🌸",nm:"MoMo",      sub:"Ví điện tử MoMo"},
+  {id:"zalopay",ico:"💙",nm:"ZaloPay",   sub:"Ví điện tử ZaloPay"},
+  {id:"vnpay",  ico:"🔴",nm:"VNPay",     sub:"Thanh toán QR"},
+];
+// ── VEHICLE TYPES (including cargo) ────────────────────────────
+// tinhPhut uses baseSpeed from Fuzzy.SPEED — NOT shared timeMultiplier for all
+var XE=[
+  {id:"bicycle",    i:"🚲",n:"Xe đạp",      cb:0,     km:2000,  mo:"Eco xanh",   cheapest:true,               cat:"passenger"},
+  {id:"bike",       i:"🛵",n:"Xe máy",      cb:10000, km:4500,  mo:"1 người",    hot:true,                    cat:"passenger"},
+  {id:"car4",       i:"🚗",n:"4 Chỗ",       cb:25000, km:12000, mo:"3 người",                                 cat:"passenger"},
+  {id:"car7",       i:"🚙",n:"7 Chỗ",       cb:30000, km:15000, mo:"6 người",                                 cat:"passenger"},
+  {id:"elec",       i:"⚡",n:"Xe điện",     cb:20000, km:10000, mo:"Xanh",                                    cat:"passenger"},
+  {id:"taxi",       i:"🚖",n:"Taxi",         cb:27000, km:13500, mo:"Đồng hồ",                                 cat:"passenger"},
+  {id:"cargo_bike", i:"📦",n:"Giao hàng",   cb:15000, km:6000,  mo:"<20kg",      cargo:true,                  cat:"cargo"},
+  {id:"cargo_van",  i:"🚐",n:"Van Hàng",    cb:35000, km:14000, mo:"<500kg",     cargo:true,                  cat:"cargo"},
+  {id:"cargo_truck",i:"🚛",n:"Xe tải",      cb:60000, km:20000, mo:"<2 tấn",     cargo:true,                  cat:"cargo"},
+];
+
+var TX=[
+  {n:"Nguyễn Văn Hùng",  xe:"Honda Wave Alpha",  b:"51B-123.45",s:4.9,t:2847,av:"👨",  cat:"passenger"},
+  {n:"Trần Minh Tâm",    xe:"Yamaha Janus",       b:"59G-678.90",s:4.8,t:1923,av:"🧑",  cat:"passenger"},
+  {n:"Lê Minh Tuấn",     xe:"Honda Air Blade",    b:"51H-112.23",s:4.7,t:3412,av:"👨‍🦱",  cat:"passenger"},
+  {n:"Phạm Văn Đức",     xe:"Toyota Vios",        b:"51A-556.78",s:5.0,t:987, av:"👨",  cat:"passenger"},
+  {n:"Đinh Văn Long",    xe:"Kia Morning",        b:"51C-990.01",s:4.6,t:4521,av:"🧔",  cat:"passenger"},
+  {n:"Ngô Văn Bình",     xe:"Xe đạp Giant",       b:"ĐẠP-001",  s:4.8,t:312, av:"🚴",  cat:"bicycle"},
+  {n:"Huỳnh Thành Đạt", xe:"VinFast VF5",        b:"51F-345.67",s:4.9,t:1567,av:"👦",  cat:"passenger"},
+  {n:"Bùi Thanh Nghị",   xe:"Yamaha Grande",      b:"51K-789.12",s:4.7,t:2103,av:"🧑‍🦳",cat:"passenger"},
+  {n:"Lê Văn Giao",      xe:"Xe máy giao hàng",   b:"51D-456.78",s:4.8,t:890, av:"👷",  cat:"cargo"},
+  {n:"Trần Hàng Hóa",    xe:"Ford Transit Van",   b:"51E-321.99",s:4.7,t:654, av:"👨‍🔧", cat:"cargo"},
+  {n:"Nguyễn Tải Trọng", xe:"Xe tải Hyundai 2T",  b:"51G-654.32",s:4.6,t:412, av:"🚚",  cat:"cargo"},
+];
+
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+var S={xe:"bike",di:null,den:null,route:null,booked:false,fuzzy:null};
+var S_PAY="cash", S_PROMO=null;
+var WEATHER=null, WEATHER_SEV=0, TRAFFIC_IDX=1;
+var DRIVER_STATUS="idle", DRIVER_COUNTDOWN=0, DRIVER_TIMER=null, CUR_TX=null;
+var fuzzyDetailVisible=false, TRIP_PROGRESS=0, MOVE_TIMER=null;
+var HISTORY=[], SCHEDULES=[];
+
+// ════════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════════
+function vt(n){ return Math.round(n).toLocaleString("vi-VN")+" \u20ab"; }
+function addMin(m){ var d=new Date(); d.setMinutes(d.getMinutes()+m); return d.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"}); }
+function rand(a){ return a[Math.floor(Math.random()*a.length)]; }
+function haversine(ll1,ll2){
+  var R=6371,r=Math.PI/180;
+  var dl=(ll2[0]-ll1[0])*r, dg=(ll2[1]-ll1[1])*r;
+  var a=Math.pow(Math.sin(dl/2),2)+Math.cos(ll1[0]*r)*Math.cos(ll2[0]*r)*Math.pow(Math.sin(dg/2),2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function getTinh(p){ var b=null,bd=Infinity; TINH.forEach(function(t){var d=haversine(p.ll,t.ll);if(d<bd){bd=d;b=t;}}); return b; }
+function dijkstra(src,dst){
+  var dist={},prev={},vis={}; TINH.forEach(function(t){dist[t.id]=Infinity;}); dist[src]=0;
+  var pq=[{id:src,d:0}];
+  while(pq.length){ pq.sort(function(a,b){return a.d-b.d;}); var cur=pq.shift(); if(vis[cur.id])continue; vis[cur.id]=true; if(cur.id===dst)break;
+    (GRAPH[cur.id]||[]).forEach(function(nb){var nd=dist[cur.id]+nb.w; if(nd<dist[nb.id]){dist[nb.id]=nd;prev[nb.id]=cur.id;pq.push({id:nb.id,d:nd});}}); }
+  var path=[],cur=dst; while(cur){path.unshift(cur);cur=prev[cur];} return path.length>1?path:null;
+}
+
+// ════════════════════════════════════════════════════════════
+// PRICE + TIME  (per-vehicle fuzzy calculation)
+// ════════════════════════════════════════════════════════════
+function tinhGia(km,xid){
+  var x=XE.find(function(v){return v.id===xid;});
+  var base=x.cb+km*x.km;
+  var mult=S.fuzzy?S.fuzzy.priceMultiplier:1.0;
+  return Math.round(base*mult/1000)*1000;
+}
+function tinhGiaSauPromo(gia){
+  if(!S_PROMO)return gia;
+  var c=PROMO_CODES[S_PROMO]; if(!c)return gia;
+  return Math.max(0,gia-Math.min(gia*c.discount,c.maxDiscount));
+}
+function tinhDiscount(gia){
+  if(!S_PROMO)return 0;
+  var c=PROMO_CODES[S_PROMO]; if(!c)return 0;
+  return Math.min(gia*c.discount,c.maxDiscount);
+}
+/*
+ * tinhPhut(durS, xeId) — Tính thời gian thực tế (phút)
+ *
+ * Cách tính:
+ *   1. OSRM trả về durS (giây) theo tốc độ xe hơi chuẩn (~50 km/h)
+ *   2. Điều chỉnh theo tốc độ thực của từng xe:
+ *        baseMins = durS/60 × (carSpeed / xeSpeed)
+ *   3. Nhân hệ số điều kiện (chỉ giao thông + thời tiết, KHÔNG phụ thuộc loại xe)
+ *        condMult = tính từ traffic + weather fuzzy (giống nhau cho mọi xe)
+ *
+ * Lý do KHÔNG dùng S.fuzzy.timeMultiplier:
+ *   S.fuzzy được tính cho xe ĐANG CHỌN → khi bấm đổi xe sẽ làm thay đổi
+ *   thời gian của xe khác → sai logic.
+ *   Thay vào đó tính condMult thuần túy từ traffic+weather độc lập.
+ */
+function tinhPhut(durS, xeId){
+  var xid = xeId || S.xe;
+  var xeSpeed  = Fuzzy.SPEED[xid] || 35;  // tốc độ xe (km/h)
+  var carSpeed = 50;                        // tốc độ tham chiếu OSRM
+
+  // Thời gian cơ bản điều chỉnh theo tốc độ xe
+  var baseMins = Math.max(2, Math.round(durS / 60 * (carSpeed / xeSpeed)));
+
+  // Hệ số điều kiện: chỉ tính từ giao thông + thời tiết (độc lập với loại xe)
+  // Dùng lại giá trị đã fuzzify sẵn trong S.fuzzy nếu có
+  var condMult = 1.0;
+  if(S.fuzzy){
+    var tf = S.fuzzy.tf, wf = S.fuzzy.wf, tm = S.fuzzy.timef;
+    // Weighted average đơn giản: traffic chiếm 50%, weather 30%, giờ 20%
+    var trafficFact  = 1.0 + tf.heavy*0.75 + tf.medium*0.35 - tf.clear*0.05;
+    var weatherFact  = 1.0 + wf.storm*0.40 + wf.rainy*0.20 + wf.cloudy*0.05;
+    var timeFact     = 1.0 + (tm.morningPeak+tm.eveningPeak)*0.30 - tm.nightTime*0.15;
+    condMult = Math.max(0.8, Math.min(2.2, trafficFact*0.5 + weatherFact*0.3 + timeFact*0.2));
+  }
+
+  return Math.max(1, Math.round(baseMins * condMult));
+}
+
+/*
+ * _pricePhanTich() — Trả về lý do điều chỉnh giá thân thiện
+ * Hiển thị ra giao diện thay vì "Fuzzy Logic"
+ */
+function _pricePhanTich(){
+  if(!S.fuzzy) return "Giá điều chỉnh";
+  var f = S.fuzzy.tf, w = S.fuzzy.wf, t = S.fuzzy.timef;
+  var reasons = [];
+  if(f.heavy  > 0.4) reasons.push("Kẹt xe");
+  if(f.medium > 0.5 && f.heavy <= 0.4) reasons.push("Đông xe");
+  if(w.storm  > 0.4) reasons.push("Mưa bão");
+  else if(w.rainy > 0.4) reasons.push("Trời mưa");
+  if(t.morningPeak > 0.4 || t.eveningPeak > 0.4) reasons.push("Giờ cao điểm");
+  if(reasons.length === 0) reasons.push("Nhu cầu cao");
+  return reasons.join(" & ") + " → cộng phụ thu";
+}
+
+// ════════════════════════════════════════════════════════════
+// WEATHER + TRAFFIC
+// ════════════════════════════════════════════════════════════
+function simulateWeather(){
+  var conds=[
+    {ico:"☀️",name:"Nắng đẹp",temp:32+Math.random()*3,hum:65,wind:8+Math.random()*5,rain:5,sev:0},
+    {ico:"⛅",name:"Có mây",  temp:30+Math.random()*3,hum:75,wind:12+Math.random()*6,rain:15,sev:1},
+    {ico:"🌦️",name:"Mưa nhẹ",temp:27+Math.random()*2,hum:85,wind:15+Math.random()*8,rain:60,sev:2},
+    {ico:"⛈️",name:"Mưa dông",temp:25+Math.random()*2,hum:92,wind:25+Math.random()*12,rain:90,sev:3},
+  ];
+  var mo=new Date().getMonth(),rainy=(mo>=4&&mo<=9);
+  var wts=rainy?[0.2,0.3,0.35,0.15]:[0.5,0.3,0.15,0.05];
+  var r=Math.random(),cum=0,w=conds[0];
+  for(var i=0;i<conds.length;i++){cum+=wts[i];if(r<=cum){w=conds[i];break;}}
+  WEATHER=w; WEATHER_SEV=w.sev;
+  document.getElementById("wb-ico").textContent=w.ico;
+  document.getElementById("wb-title").textContent=w.ico+" "+w.name;
+  document.getElementById("wb-temp").textContent=Math.round(w.temp)+"°C";
+  document.getElementById("wb-wind").textContent="Gió "+Math.round(w.wind)+" km/h";
+  document.getElementById("mw-ico").textContent=w.ico;
+  document.getElementById("mw-temp").textContent=Math.round(w.temp)+"°C";
+  document.getElementById("mw-cond").textContent=w.name;
+  document.getElementById("mw-hum").textContent=Math.round(w.hum)+"%";
+  document.getElementById("mw-wind").textContent=Math.round(w.wind);
+  document.getElementById("mw-rain").textContent=Math.round(w.rain)+"%";
+}
+function simulateTraffic(){
+  var h=new Date().getHours(),now=new Date().toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"});
+  var isPeak=(h>=7&&h<=9)||(h>=17&&h<=19);
+  var r=Math.random(),level;
+  if(isPeak)level=r<0.55?2:1; else if(h>=22||h<=5)level=0; else level=r<0.4?0:1;
+  TRAFFIC_IDX=level;
+  var D=[
+    {cls:"light", txt:"🟢 Đường thông thoáng",sub:"Lưu thông thuận lợi"},
+    {cls:"medium",txt:"🟡 Giao thông trung bình",sub:"Mật độ vừa phải"},
+    {cls:"heavy", txt:"🔴 Kẹt xe nặng",sub:"Giờ cao điểm – chậm hơn"},
+  ][level];
+  var bar=document.getElementById("traffic-bar");
+  bar.className="traffic-bar "+D.cls;
+  document.getElementById("traffic-txt").textContent=D.txt;
+  document.getElementById("traffic-sub").textContent=D.sub;
+  document.getElementById("tl-time").textContent="Cập nhật: "+now;
+  if(S.fuzzy&&S.route)recomputeFuzzy();
+}
+
+// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+// MAP – Leaflet trực tiếp trong trang (không iframe)
+// Tile: OpenStreetMap toàn cầu, zoom tự do từ 1–19
+// ════════════════════════════════════════════════════════════
+
+// --- Biến toàn cục giữ Leaflet map + các layer ---
+var _map        = null;   // L.Map instance
+var _tileLayer  = null;   // tile layer hiện tại
+var _routeLines = [];     // mảng polyline route
+var _markers    = [];     // mảng marker
+var _animTimer  = null;   // animation interval
+
+// Danh sách tile providers (fallback nếu cái trước fail)
+// Tile provider theo thứ tự ưu tiên.
+// Google Maps hiển thị đúng chủ quyền Việt Nam (Hoàng Sa, Trường Sa = VN).
+var TILES = [
+  // 1. Google Maps — hiển thị đúng lãnh thổ Việt Nam
+  { url: "https://mt{s}.google.com/vt/lyrs=m&hl=vi&x={x}&y={y}&z={z}",
+    opts: { attribution:"© Google Maps | Hoàng Sa & Trường Sa thuộc Việt Nam",
+            subdomains:"0123", maxZoom:20 } },
+  // 2. Google Maps terrain — fallback 1
+  { url: "https://mt{s}.google.com/vt/lyrs=p&hl=vi&x={x}&y={y}&z={z}",
+    opts: { attribution:"© Google Maps", subdomains:"0123", maxZoom:20 } },
+  // 3. CartoDB — fallback 2 khi không có internet Google
+  { url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    opts: { attribution:"© OSM © CARTO", subdomains:"abcd", maxZoom:20 } },
+];
+var _tileIdx = 0;
+
+/* Khởi tạo map lần đầu */
+function _initMap() {
+  if (_map) return;  // đã init rồi
+  _map = L.map("osm-map", {
+    zoomControl: true,
+    preferCanvas: true,
+    minZoom: 2,
+    maxZoom: 19,
+  });
+  _addTile();
+  // Zoom mặc định: nhìn toàn Việt Nam và vùng lân cận
+  _map.setView([16.0, 108.0], 6);
+}
+
+/* Thêm tile layer — thử theo thứ tự */
+function _addTile() {
+  if (_tileLayer) { _map.removeLayer(_tileLayer); _tileLayer = null; }
+  var t = TILES[_tileIdx % TILES.length];
+  _tileLayer = L.tileLayer(t.url, t.opts).addTo(_map);
+  // Nếu tile lỗi thì thử provider tiếp theo
+  _tileLayer.on("tileerror", function() {
+    _tileIdx++;
+    if (_tileIdx < TILES.length) _addTile();
+  });
+}
+
+/* Xóa tất cả route lines và markers */
+function _clearLayers() {
+  if (_animTimer) { clearInterval(_animTimer); _animTimer = null; }
+  _routeLines.forEach(function(l){ _map.removeLayer(l); });
+  _markers.forEach(function(m){ _map.removeLayer(m); });
+  _routeLines = [];
+  _markers = [];
+}
+
+/* Tạo custom icon */
+function _mkIcon(bg, emoji, size) {
+  size = size || 38;
+  return L.divIcon({
+    html: '<div style="'
+        + 'background:' + bg + ';'
+        + 'width:' + size + 'px;height:' + size + 'px;'
+        + 'border-radius:50%;'
+        + 'display:flex;align-items:center;justify-content:center;'
+        + 'font-size:' + Math.round(size * 0.45) + 'px;'
+        + 'border:3px solid #fff;'
+        + 'box-shadow:0 3px 10px rgba(0,0,0,.3);">'
+        + emoji + '</div>',
+    className: "",
+    iconSize:   [size, size],
+    iconAnchor: [size / 2, size],
+  });
+}
+
+/* ── Fit bounds an toàn ── */
+function _fitRoute(coords, maxZoom) {
+  if (!coords || coords.length < 2) return;
+  var bounds = L.latLngBounds(coords);
+  _map.fitBounds(bounds, { padding: [60, 60], maxZoom: maxZoom || 16, animate: true });
+}
+
+/* ════ CÁC TRẠNG THÁI MAP ════ */
+
+/* 1. Map cơ bản — khi chưa chọn điểm */
+function loadBaseMap() {
+  _initMap();
+  _clearLayers();
+  // Nhìn toàn Việt Nam
+  _map.flyTo([16.0, 108.0], 6, { duration: 1 });
+}
+
+/* 2. Hiện route sau khi tính xong */
+function loadMapWithRoute(di, den, coords, nxCoords) {
+  _initMap();
+  _clearLayers();
+
+  var rLL = (coords && coords.length > 1) ? coords : [di.ll, den.ll];
+
+  // Shadow route
+  var shadow = L.polyline(rLL, {
+    color: "rgba(198,40,40,.15)", weight: 14,
+    lineJoin: "round", lineCap: "round"
+  }).addTo(_map);
+  _routeLines.push(shadow);
+
+  // Route chính
+  var line = L.polyline(rLL, {
+    color: "#c62828", weight: 5, opacity: 0.9,
+    lineJoin: "round", lineCap: "round"
+  }).addTo(_map);
+  _routeLines.push(line);
+
+  // NX inter-province dashed
+  if (nxCoords && nxCoords.length > 2) {
+    var nx = L.polyline(nxCoords, {
+      color: "#1a237e", weight: 3, opacity: 0.5, dashArray: "8 5"
+    }).addTo(_map);
+    _routeLines.push(nx);
+  }
+
+  // Markers
+  var mDi = L.marker(di.ll, { icon: _mkIcon("#43a047", "📍", 42), zIndexOffset: 200 })
+    .addTo(_map).bindPopup("<b>📍 Điểm đón</b><br>" + di.n);
+  var mDen = L.marker(den.ll, { icon: _mkIcon("#c62828", "🏁", 42), zIndexOffset: 100 })
+    .addTo(_map).bindPopup("<b>🏁 Điểm đến</b><br>" + den.n);
+  _markers.push(mDi, mDen);
+
+  setTimeout(function(){ mDi.openPopup(); }, 500);
+  _fitRoute(rLL, 17);
+}
+
+/* 3. Tài xế đang đến (đi ngược route về điểm đón) */
+function loadMapComing(totalSecs) {
+  if (!S.di || !S.den || !S.route) return;
+  _initMap();
+  _clearLayers();
+
+  var diLL  = S.di.ll, denLL = S.den.ll;
+  var rLL   = (S.route.coords && S.route.coords.length > 1) ? S.route.coords : [diLL, denLL];
+  var xeObj = XE.find(function(x){ return x.id === S.xe; });
+  var emoji = xeObj ? xeObj.i : "🛵";
+
+  // User's planned route (mờ/dashed)
+  _routeLines.push(L.polyline(rLL, { color: "rgba(198,40,40,.15)", weight: 12 }).addTo(_map));
+  _routeLines.push(L.polyline(rLL, { color: "#c62828", weight: 3, opacity: 0.3, dashArray: "10 6" }).addTo(_map));
+
+  // Markers điểm đón / đến
+  _markers.push(L.marker(diLL,  { icon: _mkIcon("#43a047", "📍", 42), zIndexOffset: 200 }).addTo(_map)
+    .bindPopup("<b>📍 Điểm đón của bạn</b>"));
+  _markers.push(L.marker(denLL, { icon: _mkIcon("#c62828", "🏁", 40), zIndexOffset: 100 }).addTo(_map));
+
+  // Driver starts from nearby area (simulate from outside the route)
+  var rev = rLL.slice().reverse();
+  var n   = rev.length;
+  // Driver's starting position: offset from route end by ~0.005 degrees
+  var driverStart = [rev[0][0]+0.003+Math.random()*0.002, rev[0][1]-0.002+Math.random()*0.003];
+
+  // Build driver route: from driverStart → through rev → to diLL
+  var driverRoute = [driverStart].concat(rev.slice(0, Math.floor(n*0.8)));
+
+  // Draw SEPARATE blue driver route line (distinct from user route)
+  var driverShadow = L.polyline(driverRoute, {
+    color: "rgba(21,101,192,.18)", weight: 10, lineJoin:"round", lineCap:"round"
+  }).addTo(_map);
+  var driverLine = L.polyline(driverRoute, {
+    color: "#1565c0", weight: 4, opacity: 0.85,
+    dashArray: "1 0", lineJoin:"round", lineCap:"round"
+  }).addTo(_map);
+  _routeLines.push(driverShadow, driverLine);
+
+  // Driver marker
+  var dMk = L.marker(driverStart, { icon: _mkIcon("#1565c0", emoji, 46), zIndexOffset: 600 })
+    .addTo(_map).bindPopup("<b>" + emoji + " Tài xế đang đến</b><br><small>Đang trên đường đến đón bạn</small>").openPopup();
+  _markers.push(dMk);
+
+  // Animation: driver follows their OWN route to pickup
+  var driverPoints = driverRoute;
+  var dp = driverPoints.length;
+  var steps = Math.max(20, totalSecs), si = 0;
+  var travelledCoords = [driverStart];
+  _animTimer = setInterval(function() {
+    si++;
+    var idx = Math.min(dp - 1, Math.round(si / steps * (dp - 1)));
+    dMk.setLatLng(driverPoints[idx]);
+    travelledCoords.push(driverPoints[idx]);
+    // Update the driver line to show traveled portion in brighter color
+    driverLine.setLatLngs(driverPoints.slice(idx));
+    if (si >= steps) { clearInterval(_animTimer); _animTimer = null; }
+  }, 1000);
+
+  _fitRoute([driverStart].concat(rLL), 15);
+}
+
+/* 4. Xe đang chạy theo route thật */
+function loadMapMoving(durationMs) {
+  if (!S.di || !S.den || !S.route) return;
+  _initMap();
+  _clearLayers();
+
+  var diLL  = S.di.ll, denLL = S.den.ll;
+  var rLL   = (S.route.coords && S.route.coords.length > 1) ? S.route.coords : [diLL, denLL];
+  var xeObj = XE.find(function(x){ return x.id === S.xe; });
+  var emoji = xeObj ? xeObj.i : "🛵";
+  var color = (xeObj && xeObj.cargo) ? "#5d4037" : "#c62828";
+  var n     = rLL.length;
+
+  // Route shadow + mờ
+  _routeLines.push(L.polyline(rLL, { color: "rgba(198,40,40,.1)", weight: 14 }).addTo(_map));
+  var planLine = L.polyline(rLL, { color: color, weight: 4, opacity: 0.25 }).addTo(_map);
+  // Đường đã đi (tăng dần)
+  var travLine = L.polyline([rLL[0]], { color: color, weight: 6, opacity: 0.9 }).addTo(_map);
+  _routeLines.push(planLine, travLine);
+
+  // Markers
+  _markers.push(L.marker(diLL,  { icon: _mkIcon("#43a047", "📍", 38), zIndexOffset: 100 }).addTo(_map));
+  _markers.push(L.marker(denLL, { icon: _mkIcon(color, "🏁", 42), zIndexOffset: 100 }).addTo(_map));
+
+  // Xe
+  var vMk = L.marker(rLL[0], { icon: _mkIcon(color, emoji, 48), zIndexOffset: 700 }).addTo(_map);
+  _markers.push(vMk);
+
+  // Animation mượt: 250ms/step
+  var stepMs = 250, totalSteps = Math.max(1, Math.round(durationMs / stepMs)), si = 0;
+  _animTimer = setInterval(function() {
+    si++;
+    var idx = Math.min(n - 1, Math.round(si / totalSteps * (n - 1)));
+    vMk.setLatLng(rLL[idx]);
+    // Pan nhẹ mỗi 5 steps
+    if (si % 5 === 0) _map.panTo(rLL[idx], { animate: true, duration: 0.4 });
+    // Vẽ đường đã đi
+    var tr = rLL.slice(0, idx + 1);
+    travLine.setLatLngs(tr);
+    if (si >= totalSteps) { clearInterval(_animTimer); _animTimer = null; }
+  }, stepMs);
+
+  _fitRoute(rLL, 15);
+}
+
+/* 5. Đã đến nơi */
+function loadMapArrived() {
+  if (!S.di || !S.den || !S.route) return;
+  _initMap();
+  _clearLayers();
+
+  var diLL  = S.di.ll, denLL = S.den.ll;
+  var rLL   = (S.route.coords && S.route.coords.length > 1) ? S.route.coords : [diLL, denLL];
+  var xeObj = XE.find(function(x){ return x.id === S.xe; });
+  var emoji = xeObj ? xeObj.i : "🛵";
+
+  // Route xanh — toàn bộ đã đi
+  _routeLines.push(L.polyline(rLL, { color: "rgba(46,125,50,.15)", weight: 14 }).addTo(_map));
+  _routeLines.push(L.polyline(rLL, { color: "#43a047", weight: 6, opacity: 0.9 }).addTo(_map));
+
+  // Điểm đón (mờ)
+  _markers.push(L.marker(diLL, { icon: _mkIcon("#a5d6a7", "📍", 36) }).addTo(_map));
+  // Điểm đến — celebration
+  var cel = L.marker(denLL, { icon: _mkIcon("#2e7d32", "🎉", 50), zIndexOffset: 700 })
+    .addTo(_map).bindPopup("<b style='color:#2e7d32'>🎉 Đã đến nơi!</b>").openPopup();
+  _markers.push(cel);
+  _markers.push(L.marker(denLL, { icon: _mkIcon("#c62828", emoji, 40), zIndexOffset: 400 }).addTo(_map));
+
+  _fitRoute(rLL, 16);
+}
+
+
+// ROUTE FETCH
+// ════════════════════════════════════════════════════════════
+var LOAD_MSGS=["Kết nối OSRM routing…","Phân tích lộ trình…","Phân tích điều kiện di chuyển…","Hoàn tất!"];
+var loadIdx=0,loadTimer=null;
+function animLoading(){
+  loadIdx=0; clearInterval(loadTimer);
+  document.getElementById("loading-step").textContent=LOAD_MSGS[0];
+  loadTimer=setInterval(function(){loadIdx=(loadIdx+1)%LOAD_MSGS.length;document.getElementById("loading-step").textContent=LOAD_MSGS[loadIdx];},900);
+}
+function fetchRoute(di,den,cb){
+  var url="https://router.project-osrm.org/route/v1/driving/"+di.ll[1]+","+di.ll[0]+";"+den.ll[1]+","+den.ll[0]+"?overview=full&geometries=geojson";
+  var done=false,to=setTimeout(function(){if(!done){done=true;cb(null);}},10000);
+  fetch(url).then(function(r){return r.json();}).then(function(data){
+    if(done)return; done=true; clearTimeout(to);
+    if(data.code==="Ok"&&data.routes&&data.routes.length){
+      var r=data.routes[0];
+      cb({coords:r.geometry.coordinates.map(function(c){return[c[1],c[0]];}),distM:r.distance,durS:r.duration,real:true});
+    }else cb(null);
+  }).catch(function(){if(!done){done=true;clearTimeout(to);cb(null);}});
+}
+function doFetchRoute(){
+  if(!S.di||!S.den)return;
+  document.getElementById("loading").classList.add("show");
+  document.getElementById("kq").classList.remove("show"); document.getElementById("kq").innerHTML="";
+  document.getElementById("map-eta").classList.remove("show");
+  document.getElementById("map-route-info").classList.remove("show");
+  document.getElementById("sec-nx").style.display="none";
+  document.getElementById("sec-fuzzy").style.display="none";
+  animLoading();
+  var hour=new Date().getHours(),km=haversine(S.di.ll,S.den.ll);
+  S.fuzzy=Fuzzy.compute(TRAFFIC_IDX,WEATHER_SEV,hour,km,S.xe);
+  var tA=getTinh(S.di),tB=getTinh(S.den),nxPath=null,nxCoords=null;
+  if(tA&&tB&&tA.id!==tB.id){
+    nxPath=dijkstra(tA.id,tB.id);
+    if(nxPath){
+      nxCoords=nxPath.map(function(id){return TINH.find(function(t){return t.id===id;}).ll;});
+      nxCoords[0]=S.di.ll; nxCoords[nxCoords.length-1]=S.den.ll;
+    }
+  }
+  fetchRoute(S.di,S.den,function(r){
+    clearInterval(loadTimer);
+    document.getElementById("loading").classList.remove("show");
+    if(r&&r.real){
+      S.route=r; var kmReal=r.distM/1000;
+      S.fuzzy=Fuzzy.compute(TRAFFIC_IDX,WEATHER_SEV,new Date().getHours(),kmReal,S.xe);
+      var phut=tinhPhut(r.durS,S.xe);
+      document.getElementById("map-eta").classList.add("show");
+      document.getElementById("eta-min").textContent=phut+" phút";
+      document.getElementById("eta-sub").textContent=kmReal.toFixed(2)+" km • "+addMin(phut);
+      document.getElementById("map-route-info").classList.add("show");
+      document.getElementById("mri-km").textContent=kmReal.toFixed(2);
+      document.getElementById("mri-time").textContent=phut;
+      document.getElementById("mri-arrive").textContent=addMin(phut);
+      loadMapWithRoute(S.di,S.den,r.coords,nxCoords);
+    }else{
+      var km2=haversine(S.di.ll,S.den.ll);
+      S.route={coords:nxCoords||[S.di.ll,S.den.ll],distM:km2*1000,durS:km2/30*3600,real:false};
+      var phut2=tinhPhut(S.route.durS,S.xe);
+      document.getElementById("map-eta").classList.add("show");
+      document.getElementById("eta-min").textContent=phut2+" phút (ước tính)";
+      document.getElementById("eta-sub").textContent=km2.toFixed(2)+" km";
+      document.getElementById("map-route-info").classList.add("show");
+      document.getElementById("mri-km").textContent=km2.toFixed(2);
+      document.getElementById("mri-time").textContent=phut2;
+      document.getElementById("mri-arrive").textContent=addMin(phut2);
+      loadMapWithRoute(S.di,S.den,S.route.coords,nxCoords);
+    }
+    if(nxPath&&nxPath.length>2){
+      var names=nxPath.map(function(id){return TINH.find(function(t){return t.id===id;}).n;});
+      var nx=document.getElementById("sec-nx"); nx.style.display="block";
+      nx.innerHTML='<div class="nx-badge"><div class="nx-badge-title">🧭 Lộ trình qua '+(nxPath.length-2)+' tỉnh</div><div class="nx-path">'+names.map(function(nm,i){return(i>0?'<span class="nx-arrow">→</span>':'')+'<span class="nx-node">'+nm+'</span>';}).join('')+'</div></div>';
+    }
+    renderFuzzyBox(); renderXeScroll(); updateUI(true);
+    if(!S.booked)renderKQ(false);
+  });
+}
+function recomputeFuzzy(){
+  if(!S.route)return;
+  S.fuzzy=Fuzzy.compute(TRAFFIC_IDX,WEATHER_SEV,new Date().getHours(),S.route.distM/1000,S.xe);
+  renderFuzzyBox(); if(!S.booked)renderKQ(false);
+}
+
+// ════════════════════════════════════════════════════════════
+// FUZZY BOX
+// ════════════════════════════════════════════════════════════
+function renderFuzzyBox(){
+  if(!S.fuzzy)return;
+  document.getElementById("sec-fuzzy").style.display="none"; // ẩn UI, vẫn chạy ngầm
+  var f=S.fuzzy,pm=f.priceMultiplier,tmm=f.timeMultiplier,tf=f.tf,wf=f.wf,tf2=f.timef;
+  var spd=f.baseSpeed||35;
+  document.getElementById("fuzzy-factors").innerHTML=f.factors.map(function(fc){
+    return '<div class="fz-row"><span>'+(fc.bad?"🔴":"🟢")+" "+fc.l+'</span><span class="fz-factor">'+fc.i+'</span></div>';
+  }).join("")+'<div class="fz-row"><span>🚗 Tốc độ '+XE.find(function(x){return x.id===S.xe;}).n+'</span><span class="fz-factor">~'+spd+' km/h</span></div>';
+  document.getElementById("fuzzy-multipliers").innerHTML=
+    '<div class="fz-mult-box"><div class="fz-mult-lbl">Hệ số giá</div><div class="fz-mult-val" style="color:'+(pm>1.1?"#b71c1c":pm<0.95?"#2e7d32":"#4a148c")+'">×'+pm.toFixed(2)+'</div></div>'
+    +'<div class="fz-mult-box"><div class="fz-mult-lbl">Hệ số thời gian</div><div class="fz-mult-val" style="color:'+(tmm>1.2?"#b71c1c":tmm<0.95?"#2e7d32":"#4a148c")+'">×'+tmm.toFixed(2)+'</div></div>';
+  var bars=[
+    {l:"Giao thông – Thông",v:tf.clear,c:"#43a047"},{l:"Giao thông – Vừa",v:tf.medium,c:"#fb8c00"},{l:"Giao thông – Kẹt",v:tf.heavy,c:"#e53935"},
+    {l:"Thời tiết – Tốt",v:wf.good,c:"#0288d1"},{l:"Thời tiết – Mưa",v:wf.rainy,c:"#1565c0"},
+    {l:"Thời điểm – Sáng",v:tf2.morningPeak,c:"#f57c00"},{l:"Thời điểm – Chiều",v:tf2.eveningPeak,c:"#e65100"},{l:"Thời điểm – Đêm",v:tf2.nightTime,c:"#1a237e"},
+  ];
+  document.getElementById("fuzzy-bars").innerHTML=bars.map(function(b){
+    return '<div class="fz-bar-row"><div class="fz-bar-lbl">'+b.l+'</div><div class="fz-bar-track"><div class="fz-bar-fill" style="width:'+Math.round(b.v*100)+'%;background:'+b.c+'"></div></div><div class="fz-bar-val">'+Math.round(b.v*100)+'%</div></div>';
+  }).join("");
+  document.getElementById("fuzzy-mem-grid").innerHTML=[
+    {name:"Kẹt xe nặng",val:tf.heavy,c:"#e53935"},{name:"Mưa/Bão",val:Math.max(wf.rainy,wf.storm),c:"#1565c0"},
+    {name:"Giờ cao điểm",val:Math.max(tf2.morningPeak,tf2.eveningPeak),c:"#f57c00"},
+    {name:"Đường thông",val:tf.clear,c:"#43a047"},{name:"Thời tiết tốt",val:wf.good,c:"#0288d1"},{name:"Giờ đêm",val:tf2.nightTime,c:"#7b1fa2"},
+  ].map(function(m){
+    return '<div class="fz-mem-card"><div class="fz-mem-name">'+m.name+'</div><div class="fz-mem-bar"><div class="fz-mem-fill" style="width:'+Math.round(m.val*100)+'%;background:'+m.c+'"></div></div><div class="fz-mem-val">'+Math.round(m.val*100)+'%</div></div>';
+  }).join("");
+}
+function toggleFuzzyDetail(){
+  fuzzyDetailVisible=!fuzzyDetailVisible;
+  document.getElementById("fz-detail").style.display=fuzzyDetailVisible?"block":"none";
+  document.querySelector(".fz-toggle").textContent=fuzzyDetailVisible?"▲ Thu gọn":"▼ Chi tiết";
+}
+
+// ════════════════════════════════════════════════════════════
+// XE SCROLL  — two sections: passenger / cargo
+// ════════════════════════════════════════════════════════════
+var _curCat = "passenger";
+function pickCat(cat){
+  _curCat = cat;
+  // highlight selected
+  document.getElementById("cat-btn-passenger").classList.toggle("on", cat==="passenger");
+  document.getElementById("cat-btn-cargo").classList.toggle("on", cat==="cargo");
+  // switch to default xe for that cat
+  var defaultXe = cat==="cargo" ? "cargo_bike" : "bike";
+  if(XE.find(function(x){return x.id===S.xe&&x.cat===cat;})==null) S.xe = defaultXe;
+  document.getElementById("xe-cat-pick").style.display="none";
+  document.getElementById("xe-list-wrap").style.display="block";
+  document.getElementById("xe-list-title").textContent = cat==="cargo" ? "📦 Chọn loại giao hàng" : "🛵 Chọn loại xe";
+  _renderXeList();
+  if(S.route && !S.booked) renderKQ(false);
+  updateUI(true);
+}
+function backToCat(){
+  document.getElementById("xe-cat-pick").style.display="block";
+  document.getElementById("xe-list-wrap").style.display="none";
+}
+function renderXeScroll(){
+  // show cat picker (step 1) by default when section first shown
+  document.getElementById("xe-cat-pick").style.display="block";
+  document.getElementById("xe-list-wrap").style.display="none";
+  document.getElementById("xe-list-inner").innerHTML="";
+  document.getElementById("sec-xe").style.display="block";
+}
+function _renderXeList(){
+  var km=S.route?S.route.distM/1000:5;
+  var list=XE.filter(function(x){return x.cat===_curCat||(x.cat==="bicycle"&&_curCat==="passenger");});
+  var mkCard=function(x){
+    var gia=tinhGiaSauPromo(tinhGia(km,x.id));
+    var phut=S.route?tinhPhut(S.route.durS,x.id):"-";
+    var cls="xe-card"+(x.id===S.xe?" on":"")+(x.cheapest?" cheapest":"");
+    var badge=x.cheapest?'<div class="xe-badge eco">RẺ NHẤT</div>':x.hot?'<div class="xe-badge">HOT</div>':'';
+    return '<div class="'+cls+'" onclick="pickXe(\''+x.id+'\')">'
+      +badge+'<div class="xe-ico">'+x.i+'</div><div class="xe-nm">'+x.n+'</div>'
+      +'<div class="xe-pr">'+vt(gia)+'</div>'
+      +'<div class="xe-mo">'+phut+'ph • '+x.mo+'</div></div>';
+  };
+  document.getElementById("xe-list-inner").innerHTML=list.map(mkCard).join("");
+}
+function pickXe(id){
+  S.xe = id;
+  // Update ETA display for selected vehicle
+  if(S.route){
+    var phut=tinhPhut(S.route.durS, id);
+    var kmReal=S.route.distM/1000;
+    document.getElementById("eta-min").textContent=phut+" phút";
+    document.getElementById("eta-sub").textContent=kmReal.toFixed(2)+" km • "+addMin(phut);
+    document.getElementById("mri-time").textContent=phut;
+    document.getElementById("mri-arrive").textContent=addMin(phut);
+  }
+  _renderXeList();
+  updateUI(true);
+  if(S.route && !S.booked) renderKQ(false);
+}
+
+// ════════════════════════════════════════════════════════════
+// SEARCH & SUGGEST
+// ════════════════════════════════════════════════════════════
+function filterSearch(q){
+  var drop=document.getElementById("search-drop");
+  if(!q){drop.style.display="none";return;}
+  var ql=q.toLowerCase(),res=ALL_PLACES.filter(function(p){return p.n.toLowerCase().includes(ql)||p.tinh.toLowerCase().includes(ql)||(p.a&&p.a.toLowerCase().includes(ql));}).slice(0,10);
+  if(!res.length){drop.style.display="none";return;}
+  drop.style.display="block";
+  drop.innerHTML=res.map(function(p){
+    var enc=encodeURIComponent(JSON.stringify({n:p.n,a:p.tinh,i:p.i,ll:p.ll}));
+    return '<div style="display:flex;align-items:center;gap:9px;padding:9px 13px;cursor:pointer;border-bottom:1px solid #ffebee;font-family:Be Vietnam Pro,sans-serif" onmousedown="pickSearch(\''+enc+'\')" onmouseover="this.style.background=\'#fff5f5\'" onmouseout="this.style.background=\'\'">'
+      +'<span style="font-size:15px">'+p.i+'</span><div><div style="font-size:12px;font-weight:600">'+p.n+'</div><div style="font-size:10px;color:#999">'+p.a+' – '+p.tinh+'</div></div></div>';
+  }).join("");
+}
+function pickSearch(enc){
+  var p=JSON.parse(decodeURIComponent(enc));
+  if(!S.di)pickPlace("di",enc); else if(!S.den)pickPlace("den",enc); else pickPlace("den",enc);
+  document.getElementById("search-drop").style.display="none";
+  document.getElementById("inp-search").value="";
+}
+function renderSug(field,q){
+  var ql=(q||"").toLowerCase().trim();
+  var res=ql?ALL_PLACES.filter(function(p){return p.n.toLowerCase().includes(ql)||p.tinh.toLowerCase().includes(ql)||p.a.toLowerCase().includes(ql);}).slice(0,12):ALL_PLACES.slice(0,14);
+  var el=document.getElementById("sug-"+field);
+  if(!res.length){el.style.display="none";return;}
+  el.style.display="block";
+  el.innerHTML='<div class="sug-list">'+res.map(function(p){
+    var enc=encodeURIComponent(JSON.stringify({n:p.n,a:p.tinh,i:p.i,ll:p.ll}));
+    return '<div class="sug-item" onmousedown="pickPlace(\''+field+'\',\''+enc+'\')">'
+      +'<div class="sug-ico">'+p.i+'</div><div><div class="sug-nm">'+p.n+'</div><div class="sug-addr">'+p.a+' – '+p.tinh+'</div></div></div>';
+  }).join("")+'</div>';
+}
+function showSug(f){renderSug(f,document.getElementById("inp-"+f).value);}
+function hideSug(f){setTimeout(function(){var e=document.getElementById("sug-"+f);if(e)e.style.display="none";},200);}
+function onInp(f){
+  var v=document.getElementById("inp-"+f).value;
+  document.getElementById("clr-"+f).classList.toggle("show",v.length>0);
+  renderSug(f,v); S[f]=null; S.route=null; S.booked=false; DRIVER_STATUS="idle";
+  if(DRIVER_TIMER){clearInterval(DRIVER_TIMER);DRIVER_TIMER=null;}
+  updateUI(false);
+}
+function clearField(f){
+  document.getElementById("inp-"+f).value=""; document.getElementById("clr-"+f).classList.remove("show");
+  document.getElementById("sug-"+f).style.display="none";
+  S[f]=null; S.route=null; S.booked=false; DRIVER_STATUS="idle";
+  if(DRIVER_TIMER){clearInterval(DRIVER_TIMER);DRIVER_TIMER=null;}
+  ["map-eta","map-route-info"].forEach(function(id){document.getElementById(id).classList.remove("show");});
+  document.getElementById("kq").classList.remove("show"); document.getElementById("kq").innerHTML="";
+  ["sec-nx","sec-fuzzy","sec-xe","sec-promo","sec-pay"].forEach(function(id){document.getElementById(id).style.display="none";});
+  loadBaseMap(); updateUI(false);
+}
+function pickPlace(field,enc){
+  var p=JSON.parse(decodeURIComponent(enc)); S[field]=p;
+  document.getElementById("inp-"+field).value=p.n;
+  document.getElementById("clr-"+field).classList.add("show");
+  document.getElementById("sug-"+field).style.display="none";
+  if(S.di&&S.den)doFetchRoute(); else updateUI(false);
+}
+function swapRoute(){
+  var tmp=S.di; S.di=S.den; S.den=tmp;
+  ["di","den"].forEach(function(f){document.getElementById("inp-"+f).value=S[f]?S[f].n:"";document.getElementById("clr-"+f).classList.toggle("show",!!S[f]);});
+  S.route=null; S.booked=false;
+  document.getElementById("kq").classList.remove("show"); document.getElementById("kq").innerHTML="";
+  if(S.di&&S.den)doFetchRoute(); else updateUI(false);
+}
+
+// ════════════════════════════════════════════════════════════
+// PROMO
+// ════════════════════════════════════════════════════════════
+function togglePromoInput(){var a=document.getElementById("promo-input-area"),show=a.style.display!=="block";a.style.display=show?"block":"none";document.getElementById("promo-arrow").textContent=show?"∨":"›";}
+function fillPromo(code){document.getElementById("promo-inp").value=code;document.getElementById("promo-input-area").style.display="block";document.getElementById("promo-arrow").textContent="∨";}
+function applyPromo(){
+  var code=document.getElementById("promo-inp").value.trim().toUpperCase();
+  var res=document.getElementById("promo-result");
+  if(!code){res.className="promo-result error";res.innerHTML="⚠️ Nhập mã";return;}
+  if(PROMO_CODES[code]){
+    S_PROMO=code; var p=PROMO_CODES[code];
+    res.className="promo-result success"; res.innerHTML="✅ "+p.desc;
+    document.getElementById("promo-lbl").textContent="🎉 Đã dùng: "+code;
+    document.getElementById("promo-sub").textContent=p.desc;
+    renderXeScroll(); if(S.route&&!S.booked)renderKQ(false); updateUI(true);
+  }else{S_PROMO=null;res.className="promo-result error";res.innerHTML="❌ Mã không hợp lệ";}
+}
+function openPromoModal(){
+  document.getElementById("promo-codes-grid").innerHTML=Object.keys(PROMO_CODES).map(function(k){
+    var p=PROMO_CODES[k];
+    return '<div class="pcc" onclick="pickPromoModal(\''+k+'\')">'
+      +'<div class="pcc-code">'+k+'</div><div class="pcc-desc">'+p.desc+'</div>'
+      +'<div><span class="pcc-badge">'+p.badge+'</span></div></div>';
+  }).join("");
+  document.getElementById("promo-modal").classList.add("show");
+}
+function pickPromoModal(code){fillPromo(code);closeModal("promo-modal");applyPromo();}
+
+// ════════════════════════════════════════════════════════════
+// PAYMENT
+// ════════════════════════════════════════════════════════════
+function renderPayOpts(){
+  document.getElementById("pay-opts-quick").innerHTML=PAY_OPTS.slice(0,4).map(function(p){
+    return '<div class="pay-opt'+(p.id===S_PAY?" on":"")+'" onclick="setPayQuick(\''+p.id+'\')">'
+      +'<span class="po-ico">'+p.ico+'</span><div><div class="po-nm">'+p.nm+'</div><div class="po-sub">'+p.sub+'</div></div></div>';
+  }).join("");
+}
+function setPayQuick(id){S_PAY=id;renderPayOpts();renderModalPay();updateUI(true);if(S.route&&!S.booked)renderKQ(false);}
+function openPayModal(){document.getElementById("pay-modal").classList.add("show");renderModalPay();}
+function renderModalPay(){
+  document.getElementById("modal-pay-opts").innerHTML=PAY_OPTS.map(function(p){
+    return '<div class="mpo'+(p.id===S_PAY?" on":"")+'" onclick="setModalPay(\''+p.id+'\')">'
+      +'<span class="mpo-ico">'+p.ico+'</span><div><div class="mpo-nm">'+p.nm+'</div><div class="mpo-sub">'+p.sub+'</div></div>'
+      +'<span class="mpo-check">✓</span></div>';
+  }).join("");
+}
+function setModalPay(id){S_PAY=id;renderModalPay();renderPayOpts();if(S.route&&!S.booked)renderKQ(false);}
+function closeModal(id){document.getElementById(id).classList.remove("show");}
+
+// ════════════════════════════════════════════════════════════
+// UI UPDATE
+// ════════════════════════════════════════════════════════════
+function updateUI(hasRoute){
+  var showExtra=!!(S.di&&S.den);
+  document.getElementById("sec-promo").style.display=showExtra?"block":"none";
+  document.getElementById("sec-pay").style.display=showExtra?"block":"none";
+  if(showExtra)renderPayOpts();
+  var btn=document.getElementById("btn-dat");
+  var xeObj=XE.find(function(x){return x.id===S.xe;})||XE[1];
+  var isCargo=xeObj&&xeObj.cargo;
+  btn.className="btn-dat"+(S.xe==="bicycle"?" bike-btn":isCargo?" cargo-btn":"");
+  if(S.booked){updateBookedBtn();return;}
+  if(!S.di&&!S.den){btn.innerHTML="📍 Chọn điểm đi và điểm đến";btn.disabled=true;}
+  else if(!S.di){btn.innerHTML="📍 Chọn điểm đón";btn.disabled=true;}
+  else if(!S.den){btn.innerHTML="🏁 Chọn điểm đến";btn.disabled=true;}
+  else if(!S.route){btn.innerHTML="⏳ Đang tính lộ trình…";btn.disabled=true;}
+  else{
+    var km=S.route.distM/1000,gia=tinhGia(km,S.xe),giaSau=tinhGiaSauPromo(gia);
+    var ico=xeObj.i,payInfo=PAY_OPTS.find(function(p){return p.id===S_PAY;});
+    if(S_PROMO&&giaSau<gia){
+      btn.innerHTML=ico+' Đặt ngay <span style="background:rgba(255,255,255,.18);padding:2px 10px;border-radius:50px;font-size:12px;text-decoration:line-through;opacity:.7">'+vt(gia)+'</span> <span style="background:rgba(46,125,50,.5);padding:2px 10px;border-radius:50px;font-size:12px">'+vt(giaSau)+'</span> '+payInfo.ico;
+    }else{
+      btn.innerHTML=ico+' Đặt ngay <span style="background:rgba(255,255,255,.22);padding:2px 12px;border-radius:50px;font-size:12px">'+vt(giaSau)+'</span> '+payInfo.ico;
+    }
+    btn.disabled=false;
+  }
+}
+function updateBookedBtn(){
+  var btn=document.getElementById("btn-dat"); if(!btn)return;
+  btn.disabled=true;
+  var xeObj=XE.find(function(x){return x.id===S.xe;})||XE[1];
+  var ico=xeObj.i;
+  if(DRIVER_STATUS==="coming")btn.innerHTML=ico+" Đang đến đón bạn…";
+  else if(DRIVER_STATUS==="moving")btn.innerHTML="🔵 Đang di chuyển…";
+  else if(DRIVER_STATUS==="arrived")btn.innerHTML="✅ Đã đến nơi!";
+}
+
+// ════════════════════════════════════════════════════════════
+// RESULTS
+// ════════════════════════════════════════════════════════════
+function renderKQ(booked){
+  var km=S.route.distM/1000, phut=tinhPhut(S.route.durS,S.xe);
+  var xe=XE.find(function(v){return v.id===S.xe;});
+  var gia=tinhGia(km,S.xe),giaSau=tinhGiaSauPromo(gia),discount=tinhDiscount(gia);
+  var baseGia=Math.round((xe.cb+km*xe.km)/1000)*1000,fuzzyAdj=gia-baseGia;
+  var pm=S.fuzzy?S.fuzzy.priceMultiplier:1,isCargo=xe&&xe.cargo;
+  if(booked){
+    var cat=xe.id==="bicycle"?"bicycle":isCargo?"cargo":"passenger";
+    var txPool=TX.filter(function(t){return t.cat===cat||(cat==="passenger"&&t.cat==="passenger");});
+    CUR_TX=rand(txPool)||rand(TX);
+  }
+  var payInfo=PAY_OPTS.find(function(p){return p.id===S_PAY;});
+  var cho=Math.floor(Math.random()*5)+2;
+  var heroColor=isCargo?"linear-gradient(135deg,#5d4037,#4e342e)":"linear-gradient(135deg,#c62828,#b71c1c)";
+  var kq=document.getElementById("kq");
+  kq.innerHTML=
+    '<div class="price-hero" style="background:'+heroColor+'">'
+      +'<div class="ph-top"><div>'
+        +'<div class="ph-lbl">💰 Giá ước tính</div>'
+        +'<div class="ph-num">'+vt(giaSau)+'</div>'
+        +'<div class="ph-note">'+(S.route.real?"Đã điều chỉnh":"⚠️ Ước tính")+(pm!==1?" • ×"+pm.toFixed(2):"")+(S_PROMO?" • 🎁 "+S_PROMO:"")+'</div>'
+      +'</div><div class="ph-right">'
+        +'<div class="ph-km">'+km.toFixed(2)+' km</div>'
+        +'<div class="ph-xe">'+xe.i+" "+xe.n+'</div>'
+        +'<div style="font-size:10px;opacity:.7;margin-top:4px">⏱ '+phut+' phút • '+payInfo.ico+" "+payInfo.nm+'</div>'
+      +'</div></div>'
+      +'<hr class="ph-divider"/>'
+      +'<div class="ph-breakdown">'
+        +(xe.cb>0?'<div class="pb-row"><span>Giá mở cửa</span><span>'+vt(xe.cb)+'</span></div>':'')
+        +'<div class="pb-row"><span>'+km.toFixed(2)+'km × '+vt(xe.km)+'/km</span><span>'+vt(Math.round(km*xe.km/1000)*1000)+'</span></div>'
+        +(Math.abs(fuzzyAdj)>500?'<div class="pb-row fuzzy-adj"><span>'+_pricePhanTich()+'</span><span>'+(fuzzyAdj>=0?"+":"")+vt(fuzzyAdj)+'</span></div>':'')
+        +(discount>0?'<div class="pb-row discount"><span>🎁 '+S_PROMO+'</span><span>-'+vt(discount)+'</span></div>':'')
+        +'<div class="pb-row total"><span>Tổng</span><span>'+vt(giaSau)+'</span></div>'
+      +'</div></div>'
+    +'<div class="route-sum">'
+      +'<div class="rs-item"><span class="rs-d rs-d-g"></span><div><div class="rs-role">Điểm đón</div><div class="rs-nm">'+S.di.n+'</div></div></div>'
+      +'<div class="rs-item"><span class="rs-d rs-d-r"></span><div><div class="rs-role">Điểm đến</div><div class="rs-nm">'+S.den.n+'</div></div></div>'
+    +'</div>'
+    +'<div class="stats-grid">'
+      +'<div class="stat-box"><div class="s-ico">📏</div><div class="s-val">'+km.toFixed(2)+' km</div><div class="s-lbl">Khoảng cách</div></div>'
+      +'<div class="stat-box"><div class="s-ico">⏱</div><div class="s-val">'+phut+' phút</div><div class="s-lbl">Thực tế ('+xe.n+')</div></div>'
+      +'<div class="stat-box"><div class="s-ico">🕐</div><div class="s-val">'+addMin(phut)+'</div><div class="s-lbl">Đến nơi</div></div>'
+    +'</div>'
+    +(booked&&CUR_TX?renderLiveCard(CUR_TX,cho,xe):"");
+  kq.classList.add("show");
+}
+
+// ════════════════════════════════════════════════════════════
+// LIVE DRIVER CARD
+// ════════════════════════════════════════════════════════════
+function veIcon(){ var x=XE.find(function(v){return v.id===S.xe;}); return x?x.i:"🛵"; }
+function renderLiveCard(tx,cho,xe){
+  var ico=xe?xe.i:"🛵",isCargo=xe&&xe.cargo;
+  var avBg=isCargo?"linear-gradient(135deg,#5d4037,#4e342e)":S.xe==="bicycle"?"linear-gradient(135deg,#2e7d32,#1b5e20)":"linear-gradient(135deg,#c62828,#b71c1c)";
+  return (
+    '<div class="track-bar">'
+      +'<div class="track-ttl">📡 Theo dõi chuyến đi</div>'
+      +'<div class="ts" id="ts0"><div class="ts-dot done" id="td0">✓</div><div style="flex:1"><div class="ts-label done-label" id="tl0">Đặt xe thành công</div><div class="ts-sub" id="ts0s">Hệ thống đã nhận đơn</div></div></div>'
+      +'<div class="ts" id="ts1"><div class="ts-dot active" id="td1">⏳</div><div style="flex:1"><div class="ts-label active-label" id="tl1">'+ico+' Đang đến đón</div><div class="ts-sub" id="ts1s">'+tx.n+' • '+tx.b+'</div></div><span class="ts-countdown" id="ts-cd">'+cho+'p 00s</span></div>'
+      +'<div class="ts" id="ts2"><div class="ts-dot wait" id="td2">'+ico+'</div><div style="flex:1"><div class="ts-label" id="tl2">Đang di chuyển</div><div class="ts-sub" id="ts2s">Theo dõi bản đồ</div></div></div>'
+      +'<div class="ts" id="ts3"><div class="ts-dot wait" id="td3">🏁</div><div style="flex:1"><div class="ts-label" id="tl3">Đã đến nơi</div><div class="ts-sub" id="ts3s">Hoàn thành</div></div></div>'
+    +'</div>'
+    +'<div class="live-card" id="live-progress-card">'
+      +'<div class="trip-progress">'
+        +'<div class="tp-label"><span id="tp-phase">'+ico+' Đang đến đón bạn…</span><span id="tp-pct">5%</span></div>'
+        +'<div class="tp-track"><div class="tp-fill" id="tp-fill" style="width:5%"></div></div>'
+        +'<div class="tp-stops"><div class="tp-stop done" id="stop0">📋 Đặt</div><div class="tp-stop active" id="stop1">'+ico+' Đón</div><div class="tp-stop" id="stop2">🛣 Đi</div><div class="tp-stop" id="stop3">🏁 Đến</div></div>'
+      +'</div>'
+      +'<div class="eta-chip" id="eta-chip">'
+        +'<div class="etc-ico">'+ico+'</div>'
+        +'<div style="flex:1"><div class="etc-main" id="etc-main">'+ico+' Tài xế đang đến</div><div class="etc-sub">Thời gian còn lại</div></div>'
+        +'<div class="etc-countdown" id="eta-num">'+cho+'p</div>'
+      +'</div>'
+    +'</div>'
+    +'<div class="live-card" id="live-driver-card">'
+      +'<div class="lc-header">'
+        +'<div class="lc-av" style="background:'+avBg+'">'+tx.av+'</div>'
+        +'<div class="lc-meta"><div class="lc-name">'+tx.n+'</div><div class="lc-sub">'+tx.xe+' • '+tx.b+'</div>'
+          +'<span class="status-pill sp-coming" id="status-pill">'+ico+' Đang đến đón bạn</span>'
+          +'<div class="lc-star"><span class="lc-sv">⭐ '+tx.s+'</span><span class="lc-trip">• '+tx.t.toLocaleString("vi-VN")+' chuyến</span></div>'
+        +'</div>'
+      +'</div>'
+      +'<div class="lc-plate"><span style="font-size:16px">'+ico+'</span><div><div class="lc-xe">'+tx.xe+'</div><div class="lc-bien">'+tx.b+'</div></div></div>'
+      +'<div class="lc-actions">'
+        +'<button class="lc-btn" onclick="openCall(CUR_TX)">📞 Gọi</button>'
+        +'<button class="lc-btn" onclick="openChat(CUR_TX)">💬 Chat</button>'
+        +'<button class="lc-btn solid" onclick="if(confirm(\'Huỷ chuyến?\'))resetForNewTrip()">✕ Huỷ</button>'
+      +'</div>'
+    +'</div>'
+  );
+}
+function renderArrived(tx,xe,km,phut,giaSau){
+  var ico=xe?xe.i:"🎉",isCargo=xe&&xe.cargo;
+  var heroBg=isCargo?"linear-gradient(135deg,#5d4037,#4e342e)":"linear-gradient(135deg,#2e7d32,#1b5e20)";
+  return '<div class="arrived-card" id="arrived-block">'
+    +'<div class="arr-hero" style="background:'+heroBg+'">'
+      +'<div class="arr-big-ico">'+(isCargo?"📦✅":"🎉")+'</div>'
+      +'<div class="arr-title">'+(isCargo?"Giao hàng thành công!":"Đã đến nơi!")+'</div>'
+      +'<div class="arr-sub">Cảm ơn bạn đã dùng VietRide</div>'
+    +'</div>'
+    +'<div class="arr-stats">'
+      +'<div class="arr-stat"><div class="arr-stat-val">'+km.toFixed(1)+' km</div><div class="arr-stat-lbl">Quãng đường</div></div>'
+      +'<div class="arr-stat"><div class="arr-stat-val">'+phut+' phút</div><div class="arr-stat-lbl">Thời gian</div></div>'
+      +'<div class="arr-stat"><div class="arr-stat-val" style="color:#c62828">'+Math.round(giaSau/1000)+'K \u20ab</div><div class="arr-stat-lbl">Thanh toán</div></div>'
+    +'</div>'
+    +'<div class="arr-rating"><div class="arr-rate-ttl">Đánh giá '+tx.n+'</div>'
+      +'<div class="arr-stars" id="arr-stars">'
+        +'<span class="arr-star lit" onclick="rateStar(1)">⭐</span><span class="arr-star lit" onclick="rateStar(2)">⭐</span>'
+        +'<span class="arr-star lit" onclick="rateStar(3)">⭐</span><span class="arr-star lit" onclick="rateStar(4)">⭐</span>'
+        +'<span class="arr-star lit" onclick="rateStar(5)">⭐</span>'
+      +'</div>'
+      +'<textarea class="arr-comment" rows="2" placeholder="Chia sẻ trải nghiệm…"></textarea>'
+      +'<button class="arr-submit" onclick="submitRating()">Gửi đánh giá ✓</button>'
+    +'</div></div>';
+}
+function rateStar(n){document.querySelectorAll(".arr-star").forEach(function(s,i){s.classList.toggle("lit",i<n);});}
+function submitRating(){var b=document.getElementById("arrived-block");if(b)b.querySelector(".arr-rating").innerHTML='<div style="text-align:center;padding:14px;color:#2e7d32;font-weight:800">✅ Cảm ơn đánh giá!</div>';}
+
+// ════════════════════════════════════════════════════════════
+// DRIVER STATUS FLOW
+// ════════════════════════════════════════════════════════════
+function startDriverFlow(choMin){
+  DRIVER_STATUS="coming"; DRIVER_COUNTDOWN=choMin*60; TRIP_PROGRESS=5;
+  if(DRIVER_TIMER)clearInterval(DRIVER_TIMER);
+  loadMapComing(DRIVER_COUNTDOWN);
+  DRIVER_TIMER=setInterval(function(){
+    DRIVER_COUNTDOWN--;
+    var total=choMin*60, elapsed=total-DRIVER_COUNTDOWN;
+    TRIP_PROGRESS=Math.min(48,5+Math.round(elapsed/total*43));
+    _updateProg(TRIP_PROGRESS,null);
+    var m=Math.floor(DRIVER_COUNTDOWN/60),s=DRIVER_COUNTDOWN%60;
+    var cd=(m>0?m+"p ":"")+s+"s";
+    var e=document.getElementById("ts-cd"); if(e)e.textContent=cd;
+    var e2=document.getElementById("eta-num"); if(e2)e2.textContent=cd;
+    if(DRIVER_COUNTDOWN<=0){clearInterval(DRIVER_TIMER);DRIVER_TIMER=null;_toMoving();}
+  },1000);
+}
+function _toMoving(){
+  DRIVER_STATUS="moving"; TRIP_PROGRESS=52;
+  _setStep(1,"done-green","✓","ts-label done-label",null);
+  _setStep(2,"active",veIcon(),"ts-label active-label","Đang di chuyển đến đích");
+  var cd=document.getElementById("ts-cd"); if(cd)cd.style.display="none";
+  var pill=document.getElementById("status-pill");
+  if(pill){pill.className="status-pill sp-moving";pill.innerHTML=veIcon()+" Đang di chuyển";}
+  var chip=document.getElementById("eta-chip");
+  if(chip){chip.className="eta-chip moving";chip.innerHTML='<div class="etc-ico">🛣</div><div style="flex:1"><div class="etc-main">Đang trên đường đến đích</div><div class="etc-sub">Theo dõi bản đồ</div></div><div class="etc-countdown" style="color:#2e7d32">→ 🏁</div>';}
+  var s1=document.getElementById("stop1"),s2=document.getElementById("stop2");
+  if(s1)s1.className="tp-stop done"; if(s2)s2.className="tp-stop active";
+  _updateProg(52,veIcon()+" Đang di chuyển…"); updateBookedBtn();
+  var durMs=Math.min(15000,tinhPhut(S.route?S.route.durS:300,S.xe)*500);
+  loadMapMoving(durMs);
+  var steps=Math.round(durMs/300),si=0;
+  MOVE_TIMER=setInterval(function(){
+    si++; TRIP_PROGRESS=Math.min(97,52+Math.round(si/steps*45)); _updateProg(TRIP_PROGRESS,null);
+    if(si>=steps){clearInterval(MOVE_TIMER);MOVE_TIMER=null;_toArrived();}
+  },300);
+}
+function _toArrived(){
+  DRIVER_STATUS="arrived"; TRIP_PROGRESS=100;
+  _setStep(2,"done-green","✓","ts-label done-label","Đã hoàn thành");
+  _setStep(3,"done-green","🎉","ts-label done-label","Hoàn thành! 🎉");
+  var s2=document.getElementById("stop2"),s3=document.getElementById("stop3");
+  if(s2)s2.className="tp-stop done"; if(s3)s3.className="tp-stop done";
+  _updateProg(100,"✅ Đã đến nơi!");
+  var prog=document.getElementById("live-progress-card"),dCard=document.getElementById("live-driver-card");
+  var km=S.route?S.route.distM/1000:0, phut=tinhPhut(S.route?S.route.durS:300,S.xe);
+  var giaSau=tinhGiaSauPromo(tinhGia(km,S.xe));
+  var xe=XE.find(function(x){return x.id===S.xe;});
+  var arrHTML=renderArrived(CUR_TX,xe,km,phut,giaSau);
+  if(prog)prog.remove(); if(dCard)dCard.outerHTML=arrHTML;
+  updateBookedBtn(); loadMapArrived(); addToHistory();
+  // Show "book new trip" button
+  var btnWrap=document.getElementById("btn-wrap");
+  if(btnWrap){
+    var newBtn=document.createElement("button");
+    newBtn.className="new-trip-btn";
+    newBtn.innerHTML="🛵 Đặt chuyến mới";
+    newBtn.onclick=resetForNewTrip;
+    btnWrap.appendChild(newBtn);
+  }
+}
+function _setStep(idx,dotCls,dotTxt,lblCls,subTxt){
+  var dot=document.getElementById("td"+idx),lbl=document.getElementById("tl"+idx),sub=document.getElementById("ts"+idx+"s");
+  if(dot){dot.className="ts-dot "+dotCls;dot.textContent=dotTxt;}
+  if(lbl)lbl.className=lblCls; if(sub&&subTxt)sub.textContent=subTxt;
+}
+function _updateProg(pct,phaseText){
+  var fill=document.getElementById("tp-fill"); if(fill)fill.style.width=pct+"%";
+  var pctEl=document.getElementById("tp-pct"); if(pctEl)pctEl.textContent=pct+"%";
+  if(phaseText){var ph=document.getElementById("tp-phase");if(ph)ph.textContent=phaseText;}
+}
+function datXe(){
+  if(!S.di||!S.den||!S.route||S.booked)return;
+  // If digital payment, show QR first
+  if(S_PAY!=="cash"&&S_PAY!=="card"&&(S_PAY==="momo"||S_PAY==="zalopay"||S_PAY==="vnpay")){
+    var km=S.route.distM/1000;
+    var amount=tinhGiaSauPromo(tinhGia(km,S.xe));
+    openQRPayment(amount);
+    // After QR confirmation handled by confirmQRPayment → continue booking
+    // We'll let user press confirm in QR, then book
+    window._pendingBook=true;
+    return;
+  }
+  _doDatXe();
+}
+function _doDatXe(){
+  S.booked=true; DRIVER_STATUS="idle";
+  var cho=Math.floor(Math.random()*5)+2;
+  renderKQ(true); updateUI(true); startDriverFlow(cho);
+  window._pendingBook=false;
+}
+
+// ════════════════════════════════════════════════════════════
+// HISTORY + SCHEDULE
+// ════════════════════════════════════════════════════════════
+function addToHistory(){
+  if(!S.di||!S.den||!S.route)return;
+  var km=S.route.distM/1000,gia=tinhGiaSauPromo(tinhGia(km,S.xe));
+  var xe=XE.find(function(v){return v.id===S.xe;});
+  var phut=tinhPhut(S.route.durS,S.xe);
+  HISTORY.unshift({di:S.di.n,den:S.den.n,km:km.toFixed(2),gia:gia,xe:xe.n,ico:xe.i,phut:phut,
+    time:new Date().toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})+" "+new Date().toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit"})});
+  renderHistory();
+  // Update profile stats in real time
+  var soChuyern=HISTORY.length;
+  var tongKm=HISTORY.reduce(function(t,h){return t+parseFloat(h.km||0);},0);
+  var tietKiem=HISTORY.reduce(function(t,h){return t+(h.gia?Math.round(h.gia*0.05):0);},0);
+  var el;
+  el=document.getElementById("pm-trips"); if(el)el.textContent=soChuyern;
+  el=document.getElementById("pm-km"); if(el)el.textContent=tongKm.toFixed(1);
+  el=document.getElementById("pm-saved"); if(el)el.textContent=tietKiem>0?Math.round(tietKiem/1000)+"K":"0K";
+  el=document.getElementById("pm-hist-sub"); if(el)el.textContent=soChuyern+" chuyến";
+}
+function renderHistory(){
+  var el=document.getElementById("tab-content-hist"); if(!el)return;
+  if(!HISTORY.length){el.innerHTML='<div class="hist-empty"><div class="hist-ico">📋</div><div class="hist-txt">Chưa có chuyến nào</div></div>';return;}
+  el.innerHTML=HISTORY.map(function(h){
+    return '<div style="background:white;border:1.5px solid rgba(198,40,40,.12);border-radius:12px;padding:12px 14px;transition:.2s" onmouseover="this.style.background=\'#fff5f5\'" onmouseout="this.style.background=\'white\'">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+        +'<span style="font-size:18px">'+h.ico+'</span>'
+        +'<div style="flex:1;font-size:11px;font-weight:700">'+h.xe+'</div>'
+        +'<span style="font-size:11px;font-weight:800;color:#c62828">'+vt(h.gia)+'</span>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:6px;font-size:11px;margin-bottom:3px"><span style="color:#43a047;font-size:10px">●</span>'+h.di+'</div>'
+      +'<div style="display:flex;align-items:center;gap:6px;font-size:11px;margin-bottom:6px"><span style="color:#c62828;font-size:10px">●</span>'+h.den+'</div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa"><span>📏 '+h.km+' km • ⏱ '+h.phut+' phút</span><span>🕐 '+h.time+'</span></div>'
+    +'</div>';
+  }).join("");
+}
+function renderSchedule(){
+  var el=document.getElementById("tab-content-sched"); if(!el)return;
+  var minDate=new Date(); minDate.setMinutes(minDate.getMinutes()+30);
+  var minStr=minDate.toISOString().slice(0,16);
+  el.innerHTML=
+    '<div style="background:white;border:1.5px solid rgba(198,40,40,.12);border-radius:12px;padding:14px">'
+      +'<div style="font-size:13px;font-weight:800;color:#1a0a0a;margin-bottom:12px">📅 Đặt xe theo lịch</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#8d5454;margin-bottom:6px">Thời gian đón</div>'
+      +'<input type="datetime-local" id="sched-time" min="'+minStr+'" style="width:100%;padding:9px 12px;border:1.5px solid rgba(198,40,40,.12);border-radius:8px;font-size:13px;font-family:Be Vietnam Pro,sans-serif;outline:none;color:#1a0a0a;margin-bottom:12px"/>'
+      +'<div style="font-size:11px;font-weight:700;color:#8d5454;margin-bottom:4px">Điểm đón</div>'
+      +'<div style="padding:9px 12px;border:1.5px solid rgba(198,40,40,.12);border-radius:8px;font-size:12px;color:'+(S.di?"#1a0a0a":"#bbb")+';margin-bottom:8px">'+(S.di?S.di.n:"Chưa chọn")+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#8d5454;margin-bottom:4px">Điểm đến</div>'
+      +'<div style="padding:9px 12px;border:1.5px solid rgba(198,40,40,.12);border-radius:8px;font-size:12px;color:'+(S.den?"#1a0a0a":"#bbb")+';margin-bottom:12px">'+(S.den?S.den.n:"Chưa chọn")+'</div>'
+      +(S.route?'<div style="background:#fff5f5;border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:11px;color:#c62828;font-weight:700">💰 Dự kiến: '+vt(tinhGiaSauPromo(tinhGia(S.route.distM/1000,S.xe)))+'  ⏱ '+tinhPhut(S.route.durS,S.xe)+' phút</div>':'')
+      +'<button onclick="bookSchedule()" style="width:100%;padding:12px;border:none;border-radius:24px;background:linear-gradient(135deg,#e53935,#c62828);color:white;font-size:13px;font-weight:800;font-family:Be Vietnam Pro,sans-serif;cursor:pointer">📅 Đặt lịch ngay</button>'
+    +'</div>'
+    +'<div id="sched-list" style="display:flex;flex-direction:column;gap:8px"></div>';
+}
+function bookSchedule(){
+  var t=document.getElementById("sched-time");
+  if(!t||!t.value){alert("Vui lòng chọn thời gian!");return;}
+  if(!S.di||!S.den){alert("Vui lòng chọn điểm đón và đến trước!");return;}
+  var dt=new Date(t.value);
+  var xe=XE.find(function(v){return v.id===S.xe;});
+  SCHEDULES.unshift({time:dt.toLocaleString("vi-VN",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"}),di:S.di.n,den:S.den.n,xe:xe.n,ico:xe.i,
+    gia:S.route?vt(tinhGiaSauPromo(tinhGia(S.route.distM/1000,S.xe))):"--"});
+  var list=document.getElementById("sched-list");
+  if(list)list.innerHTML=SCHEDULES.map(function(sc){
+    return '<div style="background:white;border:1.5px solid rgba(198,40,40,.12);border-radius:10px;padding:11px 13px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-size:16px">'+sc.ico+'</span><div style="flex:1;font-size:12px;font-weight:700">'+sc.di+' → '+sc.den+'</div><span style="font-size:11px;color:#c62828;font-weight:800">'+sc.gia+'</span></div>'
+      +'<div style="font-size:10px;color:#888">🕐 '+sc.time+' • '+sc.xe+' <span style="background:#e8f5e9;color:#2e7d32;padding:1px 7px;border-radius:50px;font-weight:700;margin-left:6px">Đã đặt</span></div>'
+    +'</div>';
+  }).join("");
+  alert("✅ Đặt lịch thành công!\n🕐 "+dt.toLocaleString("vi-VN"));
+}
+
+// ════════════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════════════
+function switchTab(tab){
+  ["book","hist","sched"].forEach(function(t){
+    document.getElementById("tab-"+t).classList.toggle("on",t===tab);
+    var el=document.getElementById("tab-content-"+t); if(el)el.style.display=t===tab?"flex":"none";
+  });
+  document.getElementById("btn-wrap").style.display=tab==="book"?"block":"none";
+  if(tab==="hist")renderHistory();
+  if(tab==="sched")renderSchedule();
+}
+
+// ════════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ════════════════════════════════════════════════════════════
+var NOTIFS=[
+  {ico:"🎁",cls:"p",title:"Ưu đãi đặc biệt!",body:"Nhập NEWUSER giảm 50% chuyến đầu. Hạn hôm nay!",time:"2 phút trước",unread:true},
+  {ico:"✅",cls:"t",title:"Chuyến đi hoàn thành",body:"Đánh giá tài xế để nhận điểm thưởng.",time:"1 giờ trước",unread:true},
+  {ico:"📦",cls:"p",title:"Giao hàng thành công",body:"Đơn hàng của bạn đã được giao thành công.",time:"2 giờ trước",unread:true},
+  {ico:"💳",cls:"s",title:"Thanh toán thành công",body:"Giao dịch 45.000\u20ab đã xử lý qua MoMo.",time:"3 giờ trước",unread:false},
+  {ico:"🎉",cls:"p",title:"Lên hạng Vàng!",body:"Bạn đã đủ điều kiện nhận ưu đãi thành viên Vàng.",time:"Hôm qua",unread:false},
+  {ico:"⚠️",cls:"w",title:"Cảnh báo thời tiết",body:"Mưa lớn chiều nay tại TP.HCM. Đặt xe sớm!",time:"Hôm qua",unread:false},
+];
+function openNotifModal(){
+  renderNotifs(); document.getElementById("notif-modal").classList.add("show");
+}
+function renderNotifs(){
+  var list=document.getElementById("notif-list");
+  if(!list)return;
+  list.innerHTML=NOTIFS.map(function(n,i){
+    return '<div class="ni'+(n.unread?" unread":"")+'" onclick="readNotif('+i+')">'
+      +'<div class="ni-ico '+n.cls+'">'+n.ico+'</div>'
+      +'<div style="flex:1;min-width:0"><div class="ni-title">'+n.title+'</div><div class="ni-body">'+n.body+'</div><div class="ni-time">'+n.time+'</div></div>'
+    +'</div>';
+  }).join("");
+  var unread=NOTIFS.filter(function(n){return n.unread;}).length;
+  var dot=document.getElementById("notif-dot"); if(dot)dot.style.display=unread>0?"block":"none";
+}
+function readNotif(i){NOTIFS[i].unread=false;renderNotifs();}
+function markAllRead(){NOTIFS.forEach(function(n){n.unread=false;});renderNotifs();}
+
+// ════════════════════════════════════════════════════════════
+// PROFILE
+// ════════════════════════════════════════════════════════════
+function openProfileModal(){
+  document.getElementById("pm-trips").textContent=HISTORY.length;
+  var totalKm=HISTORY.reduce(function(s,h){return s+parseFloat(h.km||0);},0);
+  document.getElementById("pm-km").textContent=totalKm.toFixed(1);
+  var saved=HISTORY.reduce(function(s,h){return s+(h.gia?Math.round(h.gia*.05):0);},0);
+  document.getElementById("pm-saved").textContent=saved>0?Math.round(saved/1000)+"K":"0K";
+  document.getElementById("pm-hist-sub").textContent=HISTORY.length+" chuyến";
+  var payInfo=PAY_OPTS.find(function(p){return p.id===S_PAY;});
+  if(payInfo)document.getElementById("pm-pay-sub").textContent=payInfo.ico+" "+payInfo.nm;
+  document.getElementById("profile-modal").classList.add("show");
+}
+function toggleSw(id){
+  var sw=document.getElementById(id);
+  if(!sw)return;
+  sw.classList.toggle("on");
+  if(id==="sw-dark"){ document.body.classList.toggle("dark-mode", sw.classList.contains("on")); }
+}
+
+// ════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════
+function _appInit(){
+  simulateWeather();
+  simulateTraffic();
+  loadBaseMap();
+  updateUI(false);
+  setInterval(function(){simulateWeather();simulateTraffic();},300000);
+}
+function _waitAndInit(){
+  if(typeof L !== "undefined") _appInit();
+  else setTimeout(_waitAndInit, 50);
+}
+if(document.readyState==="complete") _waitAndInit();
+else window.addEventListener("load", _waitAndInit);
+
+/* ════════════════════════════════════════════════════════════
+   THONG BAO – Notification system
+   ════════════════════════════════════════════════════════════ */
+var NOTIFICATIONS = [
+  {ico:"🎁",cls:"promo",title:"Uu dai dac biet!",
+   body:"Nhap ma NEWUSER giam 50% chuyen dau tien.",time:"2 phut truoc",unread:true},
+  {ico:"✅",cls:"trip",title:"Chuyen di hoan thanh",
+   body:"Cam on ban da dung VietRide. Hay danh gia tai xe!",time:"1 gio truoc",unread:true},
+  {ico:"💳",cls:"sys",title:"Thanh toan thanh cong",
+   body:"Giao dich 45.000d da xu ly qua MoMo.",time:"1 gio truoc",unread:false},
+  {ico:"🎉",cls:"promo",title:"Len hang Vang!",
+   body:"Chuc mung! Ban da du dieu kien thanh vien Vang.",time:"Hom qua",unread:false},
+  {ico:"⚠️",cls:"warn",title:"Luu y thoi tiet",
+   body:"Du bao mua lon chieu nay tai TP.HCM. Dat xe som!",time:"Hom qua",unread:false},
+  {ico:"📦",cls:"trip",title:"Hang da giao thanh cong",
+   body:"Don hang 3 kg cua ban da duoc giao.",time:"2 ngay truoc",unread:false},
+];
+
+// Mo modal (notif-modal hoac profile-modal)
+function moModal(id) {
+  if (id === 'notif-modal')   veThongBao();
+  if (id === 'profile-modal') veHoSo();
+  document.getElementById(id).classList.add('show');
+}
+// Dong modal
+function dongModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+// Click ra ngoai thi dong
+function bgClose(ev, id) {
+  if (ev.target === document.getElementById(id)) dongModal(id);
+}
+// Ve danh sach thong bao
+function veThongBao() {
+  var el = document.getElementById('notif-list');
+  if (!el) return;
+  var soUnread = NOTIFICATIONS.filter(function(n){return n.unread;}).length;
+  var dot = document.getElementById('notif-dot');
+  if (dot) dot.style.display = soUnread > 0 ? 'block' : 'none';
+  el.innerHTML = NOTIFICATIONS.map(function(n,i){
+    return '<div class="notif-item'+(n.unread?' unread':'')+'" onclick="docThongBao('+i+')">'
+      +'<div class="ni-ico '+n.cls+'">'+n.ico+'</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div class="ni-title">'+n.title+'</div>'
+      +'<div class="ni-body">'+n.body+'</div>'
+      +'<div class="ni-time">'+n.time+'</div>'
+      +'</div></div>';
+  }).join('');
+}
+// Danh dau 1 thong bao da doc
+function docThongBao(i) {
+  NOTIFICATIONS[i].unread = false;
+  veThongBao();
+}
+// Danh dau tat ca da doc
+function docHet() {
+  NOTIFICATIONS.forEach(function(n){n.unread=false;});
+  veThongBao();
+}
+
+/* ════════════════════════════════════════════════════════════
+   HO SO NGUOI DUNG – Profile
+   ════════════════════════════════════════════════════════════ */
+// Cap nhat so lieu tu lich su thuc
+function veHoSo() {
+  var soChuyern = HISTORY.length;
+  var tongKm    = HISTORY.reduce(function(t,h){return t+parseFloat(h.km||0);},0);
+  var tietKiem  = HISTORY.reduce(function(t,h){return t+(h.gia?Math.round(h.gia*0.05):0);},0);
+  var payInfo   = PAY_OPTS.find(function(p){return p.id===S_PAY;});
+  var el;
+  el=document.getElementById('pm-trips');   if(el) el.textContent=soChuyern;
+  el=document.getElementById('pm-km');      if(el) el.textContent=tongKm.toFixed(1);
+  el=document.getElementById('pm-saved');   if(el) el.textContent=tietKiem>0?Math.round(tietKiem/1000)+'K':'0K';
+  el=document.getElementById('pm-hist-sub');if(el) el.textContent=soChuyern+' chuyen';
+  el=document.getElementById('pm-pay-sub'); if(el&&payInfo) el.textContent=payInfo.ico+' '+payInfo.nm;
+}
+// Bat / tat switch
+function batTat(id) {
+  var sw=document.getElementById(id);
+  if(sw) sw.classList.toggle('on');
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESET FOR NEW TRIP
+   ════════════════════════════════════════════════════════════ */
+function resetForNewTrip() {
+  // Reset state
+  S.di=null; S.den=null; S.route=null; S.booked=false; S.fuzzy=null;
+  DRIVER_STATUS="idle"; DRIVER_COUNTDOWN=0; TRIP_PROGRESS=0;
+  if(DRIVER_TIMER){clearInterval(DRIVER_TIMER);DRIVER_TIMER=null;}
+  if(MOVE_TIMER){clearInterval(MOVE_TIMER);MOVE_TIMER=null;}
+  S_PROMO=null;
+
+  // Reset inputs
+  ["di","den"].forEach(function(f){
+    var inp=document.getElementById("inp-"+f);
+    if(inp)inp.value="";
+    var clr=document.getElementById("clr-"+f);
+    if(clr)clr.classList.remove("show");
+  });
+
+  // Hide/reset sections
+  ["map-eta","map-route-info"].forEach(function(id){document.getElementById(id).classList.remove("show");});
+  ["sec-nx","sec-fuzzy","sec-xe","sec-promo","sec-pay"].forEach(function(id){document.getElementById(id).style.display="none";});
+  var kq=document.getElementById("kq");
+  kq.classList.remove("show"); kq.innerHTML="";
+
+  // Reset btn-wrap (remove new-trip-btn if any)
+  var btnWrap=document.getElementById("btn-wrap");
+  btnWrap.querySelectorAll(".new-trip-btn").forEach(function(b){b.remove();});
+
+  loadBaseMap();
+  updateUI(false);
+  // Switch to book tab
+  switchTab("book");
+}
+
+/* ════════════════════════════════════════════════════════════
+   QR PAYMENT
+   ════════════════════════════════════════════════════════════ */
+var _qrTimer=null, _qrSecs=300;
+var QR_CONFIGS={
+  momo:{ico:"🌸",title:"MoMo",color:"#ae2070",textColor:"white",amountBg:"rgba(174,32,112,.08)",
+    account:"Nguyễn Văn An • 0912345678",boxBg1:"#fff0f7",boxBg2:"#fff0f7",boxBg3:"#fff0f7",
+    timerColor:"#ae2070",btnGrad:"linear-gradient(135deg,#d81b60,#ae2070)"},
+  zalopay:{ico:"💙",title:"ZaloPay",color:"#0068ff",textColor:"white",amountBg:"rgba(0,104,255,.08)",
+    account:"VietRide • 0987654321",boxBg1:"#e8f0ff",boxBg2:"#e8f0ff",boxBg3:"#e8f0ff",
+    timerColor:"#0068ff",btnGrad:"linear-gradient(135deg,#1976d2,#0068ff)"},
+  vnpay:{ico:"🔴",title:"VNPay QR",color:"#e53935",textColor:"white",amountBg:"rgba(229,57,53,.08)",
+    account:"VietRide JSC • VN123",boxBg1:"#fff5f5",boxBg2:"#fff5f5",boxBg3:"#fff5f5",
+    timerColor:"#e53935",btnGrad:"linear-gradient(135deg,#c62828,#e53935)"},
+};
+
+function openQRPayment(amount) {
+  var cfg=QR_CONFIGS[S_PAY];
+  if(!cfg) return; // not a QR method
+
+  var tripId="VR-"+Math.floor(10000+Math.random()*90000);
+  var box=document.getElementById("qr-box");
+  var head=document.getElementById("qr-head");
+
+  // Style the modal per payment method
+  head.style.background=cfg.color;
+  document.getElementById("qr-ico").textContent=cfg.ico;
+  document.getElementById("qr-title").style.color=cfg.textColor;
+  document.getElementById("qr-title").textContent=cfg.title;
+  document.getElementById("qr-sub").style.color="rgba(255,255,255,.7)";
+  document.getElementById("qr-sub").textContent="Quét mã QR để thanh toán";
+  var closeBtn=document.getElementById("qr-close-btn");
+  closeBtn.style.background="rgba(255,255,255,.2)";
+  closeBtn.style.color=cfg.textColor;
+
+  var amountBox=document.getElementById("qr-amount-box");
+  amountBox.style.background=cfg.amountBg;
+  amountBox.style.border="1px solid "+cfg.color+"33";
+  document.getElementById("qr-amount-val").style.color=cfg.color;
+  document.getElementById("qr-amount-val").textContent=vt(amount);
+  document.getElementById("qr-tripid").textContent=tripId;
+  document.getElementById("qr-account").textContent=cfg.account;
+  ["qr-box1","qr-box2","qr-box3"].forEach(function(id,i){
+    var el=document.getElementById(id);
+    el.style.background=i===0?cfg.boxBg1:i===1?cfg.boxBg2:cfg.boxBg3;
+    el.style.borderRadius="10px";
+  });
+  document.querySelector(".qr-timer-fill").style.background=cfg.color;
+  var confirmBtn=document.getElementById("qr-confirm-btn");
+  confirmBtn.style.background=cfg.btnGrad;
+
+  // Draw QR on canvas (simple block pattern simulation)
+  drawQRCanvas(tripId+amount, cfg.color);
+
+  // Timer
+  _qrSecs=300;
+  updateQRTimer();
+  if(_qrTimer)clearInterval(_qrTimer);
+  _qrTimer=setInterval(function(){
+    _qrSecs--;
+    updateQRTimer();
+    if(_qrSecs<=0){clearInterval(_qrTimer);_qrTimer=null;closeQR();}
+  },1000);
+
+  document.getElementById("qr-modal").classList.add("show");
+}
+
+function updateQRTimer(){
+  var m=Math.floor(_qrSecs/60),s=_qrSecs%60;
+  document.getElementById("qr-expire").textContent=m+":"+(s<10?"0":"")+s;
+  document.getElementById("qr-timer-fill").style.width=(_qrSecs/300*100)+"%";
+}
+function closeQR(){
+  document.getElementById("qr-modal").classList.remove("show");
+  if(_qrTimer){clearInterval(_qrTimer);_qrTimer=null;}
+}
+function confirmQRPayment(){
+  closeQR();
+  // Show success toast
+  var toast=document.createElement("div");
+  toast.style.cssText="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2e7d32;color:white;padding:12px 24px;border-radius:50px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2);";
+  toast.textContent="✅ Thanh toán thành công!";
+  document.body.appendChild(toast);
+  setTimeout(function(){toast.remove();},3000);
+  // Proceed with booking if pending
+  if(window._pendingBook){
+    setTimeout(function(){ _doDatXe(); }, 600);
+  }
+}
+
+function drawQRCanvas(data, color) {
+  var c=document.getElementById("qr-canvas"), ctx=c.getContext("2d");
+  var sz=200, cell=8, n=Math.floor(sz/cell);
+  ctx.clearRect(0,0,sz,sz);
+  ctx.fillStyle="white";
+  ctx.fillRect(0,0,sz,sz);
+  // Generate deterministic pattern from data string
+  var seed=0;
+  for(var i=0;i<data.length;i++) seed=(seed*31+data.charCodeAt(i))&0xffffff;
+  function rand(){seed=(seed*1664525+1013904223)&0xffffffff;return (seed>>>0)/0xffffffff;}
+  ctx.fillStyle=color||"#000";
+  for(var r=0;r<n;r++){
+    for(var col2=0;col2<n;col2++){
+      if(rand()>0.5){
+        ctx.fillRect(col2*cell,r*cell,cell,cell);
+      }
+    }
+  }
+  // Draw finder patterns (corners)
+  function finder(x,y){
+    ctx.fillStyle=color||"#000";
+    ctx.fillRect(x,y,7*cell,7*cell);
+    ctx.fillStyle="white";
+    ctx.fillRect(x+cell,y+cell,5*cell,5*cell);
+    ctx.fillStyle=color||"#000";
+    ctx.fillRect(x+2*cell,y+2*cell,3*cell,3*cell);
+  }
+  finder(0,0); finder(sz-7*cell,0); finder(0,sz-7*cell);
+  // Center logo
+  ctx.fillStyle="white";
+  ctx.beginPath();
+  ctx.arc(sz/2,sz/2,16,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle=color||"#c62828";
+  ctx.font="bold 11px Lexend,sans-serif";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.fillText("VR",sz/2,sz/2);
+}
+
+/* ════════════════════════════════════════════════════════════
+   CALL UI
+   ════════════════════════════════════════════════════════════ */
+var _callTimer=null, _callSecs=0, _callMuted=false, _callSpeaker=false;
+
+function openCall(tx) {
+  if(!tx) tx=CUR_TX; if(!tx) return;
+  var xe=XE.find(function(x){return x.id===S.xe;})||XE[1];
+  var isCargo=xe&&xe.cargo;
+  var heroColor=isCargo?"linear-gradient(135deg,#5d4037,#4e342e)":
+    S.xe==="bicycle"?"linear-gradient(135deg,#2e7d32,#1b5e20)":
+    "linear-gradient(135deg,#c62828,#b71c1c)";
+  document.getElementById("call-hero").style.background=heroColor;
+  document.getElementById("call-avatar").textContent=tx.av||"👨";
+  document.getElementById("call-name").textContent=tx.n;
+  document.getElementById("call-vehicle").textContent=tx.xe+" • "+tx.b;
+  document.getElementById("call-status-txt").textContent="Đang kết nối…";
+  document.getElementById("call-timer").textContent="0:00";
+  _callMuted=false; _callSpeaker=false;
+  document.getElementById("call-mute").textContent="🎤";
+  document.getElementById("call-mute").querySelector(".call-action-lbl").textContent="Mic";
+
+  document.getElementById("call-modal").classList.add("show");
+  _callSecs=0;
+  setTimeout(function(){document.getElementById("call-status-txt").textContent="Đang gọi…";},800);
+  setTimeout(function(){document.getElementById("call-status-txt").textContent="Đã kết nối 🔊";},2000);
+
+  if(_callTimer)clearInterval(_callTimer);
+  _callTimer=setInterval(function(){
+    _callSecs++;
+    var m=Math.floor(_callSecs/60),s=_callSecs%60;
+    document.getElementById("call-timer").textContent=m+":"+(s<10?"0":"")+s;
+  },1000);
+}
+function closeCall(){
+  document.getElementById("call-modal").classList.remove("show");
+  if(_callTimer){clearInterval(_callTimer);_callTimer=null;} _callSecs=0;
+}
+function toggleMute(){
+  _callMuted=!_callMuted;
+  var btn=document.getElementById("call-mute");
+  btn.textContent=_callMuted?"🔇":"🎤";
+  btn.querySelector(".call-action-lbl").textContent=_callMuted?"Đã tắt":"Mic";
+  btn.style.background=_callMuted?"rgba(229,57,53,.3)":"rgba(255,255,255,.2)";
+}
+function toggleSpeaker(){
+  _callSpeaker=!_callSpeaker;
+  var btn=document.getElementById("call-speaker");
+  if(btn){btn.textContent=_callSpeaker?"🔉":"🔊"; btn.style.background=_callSpeaker?"rgba(76,175,80,.3)":"rgba(255,255,255,.2)";}
+}
+
+/* ════════════════════════════════════════════════════════════
+   CHAT UI
+   ════════════════════════════════════════════════════════════ */
+var _chatMsgs=[];
+var DRIVER_AUTO_REPLIES=[
+  "Tôi sắp đến rồi bạn ơi! 🛵",
+  "OK bạn đứng yên đó nhé, tôi 2 phút nữa là tới!",
+  "Bạn ở trước cổng hay trong hẻm vậy?",
+  "Tôi đang rẽ vào đường Lê Lợi, sắp tới rồi!",
+  "Dạ tôi thấy bạn rồi! Tôi mặc áo trắng đang vẫy đây 👋",
+  "OK bạn ơi, tôi nghe rõ rồi!",
+  "Đang kẹt một chút ở ngã tư, chờ tôi tí nhé 🙏"
+];
+
+function openChat(tx) {
+  if(!tx) tx=CUR_TX; if(!tx) return;
+  var xe=XE.find(function(x){return x.id===S.xe;})||XE[1];
+  var isCargo=xe&&xe.cargo;
+  var headerColor=isCargo?"linear-gradient(135deg,#5d4037,#4e342e)":
+    S.xe==="bicycle"?"linear-gradient(135deg,#2e7d32,#1b5e20)":
+    "linear-gradient(135deg,#c62828,#b71c1c)";
+  var chatHead=document.getElementById("chat-head");
+  chatHead.style.background=headerColor;
+  document.getElementById("chat-av").textContent=tx.av||"👨";
+  document.getElementById("chat-av").style.background="rgba(255,255,255,.2)";
+  document.getElementById("chat-driver-name").style.color="white";
+  document.getElementById("chat-driver-name").textContent=tx.n;
+  chatHead.querySelector(".chat-status").style.color="rgba(255,255,255,.7)";
+  var closeBtn=document.getElementById("chat-close-btn");
+  closeBtn.style.background="rgba(255,255,255,.2)";
+  closeBtn.style.color="white";
+
+  // Reset messages
+  _chatMsgs=[];
+  // Initial driver message
+  _chatMsgs.push({from:"driver",text:"Xin chào! Tôi là "+tx.n+", đang trên đường đến đón bạn 🛵",time:_nowTime()});
+  renderChatMsgs();
+
+  document.getElementById("chat-modal").classList.add("show");
+  document.getElementById("chat-inp").focus();
+}
+function closeChat(){document.getElementById("chat-modal").classList.remove("show");}
+function _nowTime(){return new Date().toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"});}
+
+function renderChatMsgs(){
+  var el=document.getElementById("chat-msgs");
+  el.innerHTML=_chatMsgs.map(function(m){
+    return '<div><div class="chat-msg '+m.from+'">'+m.text+'<div class="chat-msg-time">'+m.time+'</div></div></div>';
+  }).join("");
+  el.scrollTop=el.scrollHeight;
+}
+function sendChatMsg(){
+  var inp=document.getElementById("chat-inp");
+  var txt=inp.value.trim(); if(!txt)return;
+  _chatMsgs.push({from:"user",text:txt,time:_nowTime()});
+  inp.value="";
+  renderChatMsgs();
+  // Auto-reply after delay
+  setTimeout(function(){
+    var reply=DRIVER_AUTO_REPLIES[Math.floor(Math.random()*DRIVER_AUTO_REPLIES.length)];
+    _chatMsgs.push({from:"driver",text:reply,time:_nowTime()});
+    renderChatMsgs();
+  },1200+Math.random()*1500);
+}
+function sendQuick(txt){
+  _chatMsgs.push({from:"user",text:txt,time:_nowTime()});
+  renderChatMsgs();
+  setTimeout(function(){
+    var reply=DRIVER_AUTO_REPLIES[Math.floor(Math.random()*DRIVER_AUTO_REPLIES.length)];
+    _chatMsgs.push({from:"driver",text:reply,time:_nowTime()});
+    renderChatMsgs();
+  },1000+Math.random()*1200);
+}
+
+
+/*
+ * Tinh thoi gian (phut) cho 1 xe cu the.
+ * Dung khi ve card xe (khac voi tinhPhut vi khong phu thuoc S.xe)
+ *
+ * Cong thuc:
+ *   baseMins = (km / speed) * 60
+ *   ketqua   = baseMins * fuzzyTimeMultiplier
+ */
+function tinhPhutXe(km, xe) {
+  var speed    = xe.speed || 35;
+  var baseMins = Math.max(1, Math.round((km / speed) * 60));
+  var mult     = S.fuzzy ? S.fuzzy.timeMultiplier : 1.0;
+  return Math.max(1, Math.round(baseMins * mult));
+}
+
+
+// ════ SPLASH / LOGOUT ════
+var USER_PROFILE = {name:"Nguyễn Văn An", phone:"0912 345 678", email:"anvan@email.com", dob:"1995-06-15"};
+
+function splashLogin(){
+  var ph=document.getElementById("splash-phone").value.trim();
+  var pw=document.getElementById("splash-pass").value.trim();
+  if(!ph||!pw){alert("Vui lòng nhập đầy đủ thông tin!");return;}
+  document.getElementById("splash-screen").style.display="none";
+}
+
+function doLogout(){
+  if(!confirm("Đăng xuất?"))return;
+  closeModal("profile-modal");
+  setTimeout(function(){
+    document.getElementById("splash-screen").style.display="flex";
+    document.getElementById("splash-phone").value="";
+    document.getElementById("splash-pass").value="";
+  },200);
+}
+
+function openProfileEdit(){
+  document.getElementById("edit-name").value=USER_PROFILE.name;
+  document.getElementById("edit-phone").value=USER_PROFILE.phone;
+  document.getElementById("edit-email").value=USER_PROFILE.email;
+  document.getElementById("edit-dob").value=USER_PROFILE.dob;
+  document.getElementById("profile-edit-modal").classList.add("show");
+}
+
+function saveProfileEdit(){
+  USER_PROFILE.name=document.getElementById("edit-name").value.trim()||USER_PROFILE.name;
+  USER_PROFILE.phone=document.getElementById("edit-phone").value.trim()||USER_PROFILE.phone;
+  USER_PROFILE.email=document.getElementById("edit-email").value.trim()||USER_PROFILE.email;
+  USER_PROFILE.dob=document.getElementById("edit-dob").value||USER_PROFILE.dob;
+  // Update display in profile modal
+  var pmName=document.querySelector(".pm-name"); if(pmName)pmName.textContent=USER_PROFILE.name;
+  var pmPhone=document.querySelector(".pm-phone"); if(pmPhone)pmPhone.textContent="📱 "+USER_PROFILE.phone;
+  closeModal("profile-edit-modal");
+  var toast=document.createElement("div");
+  toast.style.cssText="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2e7d32;color:white;padding:12px 24px;border-radius:50px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2);";
+  toast.textContent="✅ Đã lưu thông tin!";
+  document.body.appendChild(toast);
+  setTimeout(function(){toast.remove();},2500);
+}
+
+
+TX.push(
+  {n:"Phan Van Giao",  xe:"Xe may cho hang", b:"HANG-001",   s:4.8,t:542,av:"👨‍🔧",cat:"cargo"},
+  {n:"Nguyen Hai Nam", xe:"Ford Transit",    b:"51H-666.77", s:4.7,t:321,av:"🧑‍🔧",cat:"cargo"},
+  {n:"Tran Quoc Bao",  xe:"Xe tai 1 tan",    b:"51D-888.99", s:4.6,t:189,av:"👷",  cat:"cargo"}
+);
+
+</script>
+</body>
+</html>
